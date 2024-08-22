@@ -34,7 +34,7 @@ class Woo_Discord_Steam_Integration_Front {
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_public_assets' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_public_assets' ) );
 		// add_filter( 'woocommerce_order_button_html', array( $this, 'custom_place_order_button_html' ) );
-		add_filter( 'woocommerce_before_checkout_form', array( $this, 'add_connect_discord_button_billing_form' ) );
+		// add_filter( 'woocommerce_before_checkout_form', array( $this, 'add_connect_discord_button_billing_form' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'handle_successful_purchase' ) );
 		add_action( 'init', array( $this, 'init_shortcodes') ) ;
 		add_action( 'init', array ($this, 'handle_steam_openid_callback' ) );
@@ -358,6 +358,10 @@ public function shortcode_ets_steam() {
 
 
 	/**
+	 * TO REMOVE
+	 * _________________________________________________
+	 * 
+	 * 
 	 * Add a "Connect Discord" button above the billing details on the checkout page.
 	 *
 	 * This method checks if the user is connected to Discord. If the user is not connected, 
