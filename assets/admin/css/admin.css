@@ -1,0 +1,108 @@
+/* admin.css */
+
+.wrap .form-table input[type="text"],
+.wrap .form-table input[type="password"] {
+    width: 100%;
+    height: 40px;
+    padding: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.wrap .form-table input[disabled] {
+    background-color: #f1f1f1;
+    color: #777;
+}
+.wrap img.ets-discord-steam-integration-image{
+    width: 120px;
+    height: auto;
+    float: left;
+    display: inline-block;
+}
+.wrap h1.ets-discord-steam-integration-title{
+    clear: both;
+}
+#discord_bot_redirect_url, #discord_auth_redirect_url {
+    pointer-events: none;
+    background-color: #f1f1f1;
+    color: #a1a1a1;
+    border: 1px solid #ddd;
+}
+
+
+
+.woo-discord-steam-warning .description {
+    font-weight: bold;
+}
+
+.woo-discord-steam-warning {
+    background-color: #ffc107!important; 
+    border: 1px solid #faebcc; /* Bootstrap warning border color */
+    color: #8a6d3b; /* Bootstrap warning text color */
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    text-align: center;
+    display: inline-block;
+}
+
+
+.woo-discord-steam-error {
+    background-color: #ffebe8; 
+    border: 1px solid #c00; 
+    color: #c00;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    text-align: center;
+    display: inline-block;
+}
+
+.woo-discord-steam-valid {
+    background-color: #dff0d8; 
+    border: 1px solid #3c763d; 
+    color: #3c763d;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    text-align: center;
+    display: inline-block;
+}
+.woo-discord-steam-info {
+    background-color: #d9edf7;
+    border: 1px solid #bce8f1;
+    color: #31708f;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+.woo-discord-steam-bot-connected {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    /* width: 100%; */
+}
+.woo-discord-steam-bot-connected svg{
+    float: right;
+    display: inline-block;
+    margin-left: 5px;
+    margin-top: 2px;
+}
+.copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 16px;
+    color: #0073aa;
+}
+
+.copy-btn:hover {
+    color: #005f8d;
+}
+

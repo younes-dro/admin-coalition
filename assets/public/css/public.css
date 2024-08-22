@@ -1,0 +1,190 @@
+/* Discord Button */
+.button.discord-login-button {
+    background-color: #7289da;
+    color: #fff;
+    text-align: center;
+    padding: 10px 20px;
+    display: inline-block;
+    margin-top: 20px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.button.discord-login-button:hover {
+    background-color: #5a6ea6;
+}
+
+/* Steam Button */
+.button.steam-login-button {
+    background-color: #171a21;
+    color: #fff;
+    text-align: center;
+    padding: 10px 20px;
+    display: inline-block;
+    margin-top: 20px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.button.steam-login-button:hover {
+    background-color: #1b4b7e;
+}
+
+/* Hidden Class */
+.ets-hidden {
+    display: none!important;
+}
+
+/* Shortcode Wrapper */
+.ets_shortcode_wrapper {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.ets_shortcode_wrapper a.button.alt {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007cba; /* WordPress button blue color */
+    color: #fff;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.ets_shortcode_wrapper a.button.alt:hover {
+    background-color: #005a8e; /* Darker blue for hover */
+}
+
+/* Connected State Styling */
+.ets_shortcode_wrapper.connected {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.ets_shortcode_wrapper.connected .logo {
+    margin-right: 10px;
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.ets_shortcode_wrapper.connected .logo.discord-logo {
+    background-image: url('../images/discord-logo.png');
+}
+
+.ets_shortcode_wrapper.connected .logo.steam-logo {
+    background-image: url('../images/steam-logo.png');
+}
+
+.ets_shortcode_wrapper.connected img {
+    margin-left: 10px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+/* Connected State Hover */
+.ets_shortcode_wrapper.connected:hover {
+    background-color: #e0e0e0;
+}
+
+/* Ensure buttons appear on the same line */
+.ets_shortcode_wrapper + .ets_shortcode_wrapper {
+    margin-left: 15px;
+}
+
+/* Responsive behavior for smaller screens */
+@media (max-width: 768px) {
+    .ets_shortcode_wrapper {
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+
+    .ets_shortcode_wrapper + .ets_shortcode_wrapper {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .ets_shortcode_wrapper.connected {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ets_shortcode_wrapper.connected img {
+        margin-top: 10px;
+        margin-left: 0;
+    }
+}
+
+/* Connect Buttons Container */
+.connect-buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 50%;
+}
+
+/* Connect Button Style */
+.connect-button {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    flex: 1;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.connect-button .logo {
+    margin-right: 10px;
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.connect-button .logo.discord-logo {
+    background-image: url('../images/discord-logo.png');
+}
+
+.connect-button .logo.steam-logo {
+    background-image: url('../images/steam-logo.png');
+}
+
+/* Connected Button State */
+.connect-button.connected {
+    background-color: #f0f0f0;
+}
+
+.connect-button.connected:hover {
+    background-color: #e0e0e0;
+}
+
+/* Connect Button Hover Effect */
+.connect-button:hover {
+    background-color: #f9f9f9;
+    border-color: #ccc;
+}
+
+/* Responsive behavior for smaller screens */
+@media (max-width: 768px) {
+    .connect-buttons-container {
+        flex-direction: column;
+    }
+}
