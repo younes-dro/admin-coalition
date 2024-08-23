@@ -216,6 +216,7 @@ class Woo_Discord_Steam_Integration_Admin {
 			if ( ! is_array( $discord_roles ) ) {
 				$discord_roles = unserialize( $discord_roles );
 			}
+			asort( $discord_roles );
 			$discord_roles = array( '0' => __( 'Select a role', 'admin-coalition' ) ) + $discord_roles;
 
 			woocommerce_wp_select(

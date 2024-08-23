@@ -41,7 +41,7 @@ class Woo_Discord_Steam_Integration_Front {
 		// add_action( 'woocommerce_payment_complete', array( $this, 'handle_successful_purchase' ) );
 		// add_action( 'woocommerce_payment_complete_order_status_completed', array( $this, 'handle_successful_purchase' ) );
 		add_action('woocommerce_checkout_order_processed', array( $this, 'log_purchase_message'), 10, 3);
-		add_action( 'woocommerce_checkout_process', array( $this, 'validate_connect_buttons' ) );
+		add_action( 'woocommerce_checkout_process', array( $this, 'validate_connect_buttons' ), 20 );
 	}
 
 	public function register_public_assets(){
@@ -66,30 +66,30 @@ class Woo_Discord_Steam_Integration_Front {
 	 * @param array $atts Shortcode attributes.
 	 * @return string The HTML for the Connect Discord button or a disconnect button with the Discord username if already connected.
 	 */
-	public function shortcode_connect_discord( $atts ) {
-		wp_enqueue_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-public');
+	public function shortcode_connect_discord($atts) {
+		wp_enqueue_style(Woo_Discord_Steam_Integration()->get_plugin_name() . '-public');
 
-		$atts = shortcode_atts( array(
-			'redirect_url' => wc_get_checkout_url(), 
-		), $atts );
+		$atts = shortcode_atts(array(
+			'redirect_url' => wc_get_checkout_url(),
+		), $atts);
 
-		$redirect_url = esc_url( $atts['redirect_url'] );
+		$redirect_url = esc_url($atts['redirect_url']);
 
-		if ( is_user_logged_in() ) {
+		if (is_user_logged_in()) {
 			$user_id = get_current_user_id();
-			$discord_connected = Woo_Discord_Steam_Integration_Utils::is_user_connected_to_discord( $user_id );
-			$discord_username = get_user_meta( $user_id, '_ets_discord_username', true );
+			$discord_connected = Woo_Discord_Steam_Integration_Utils::is_user_connected_to_discord($user_id);
+			$discord_username = get_user_meta($user_id, '_ets_discord_username', true);
 
-			if ( ! $discord_connected ) {
-				$auth_url = add_query_arg( 'redirect_url', urlencode( $redirect_url ), '?action=discord-auth' );
-				return '<div class="ets_shortcode_wrapper"><a href="' . esc_url( $auth_url ) . '" class="button alt connect-button"><span class="logo discord-logo"></span>' . __( 'Login with Discord', 'admin-coalition' ) . '</a></div>';
+			if (!$discord_connected) {
+				$auth_url = add_query_arg('redirect_url', urlencode($redirect_url), '?action=discord-auth');
+				return '<div class="ets_shortcode_wrapper"><a href="' . esc_url($auth_url) . '" class="button ets-alt connect-button discord-button"><span class="logo discord-logo"></span>' . __('Login with Discord', 'admin-coalition') . '</a></div>';
 			} else {
-				$username_display = $discord_username ? '<div class="ets_shortcode_wrapper connected"><span class="logo discord-logo"></span>' . __( 'Connected to Discord as: ', 'admin-coalition' ) . esc_html( $discord_username ) . '</div>' : '';
+				$username_display = $discord_username ? '<div class="ets_shortcode_wrapper connected"><span class="logo discord-logo"></span>' . __('Connected to Discord as: ', 'admin-coalition') . esc_html($discord_username) . '</div>' : '';
 				return $username_display;
 			}
 		} else {
-			$auth_url = add_query_arg( 'redirect_url', urlencode( $redirect_url ), '?action=discord-auth' );
-			return '<div class="ets_shortcode_wrapper"><a href="' . esc_url( $auth_url ) . '" class="button alt connect-button"><span class="logo discord-logo"></span>' . __( 'Login with Discord', 'admin-coalition' ) . '</a></div>';
+			$auth_url = add_query_arg('redirect_url', urlencode($redirect_url), '?action=discord-auth');
+			return '<div class="ets_shortcode_wrapper"><a href="' . esc_url($auth_url) . '" class="button ets-alt connect-button discord-button"><span class="logo discord-logo"></span>' . __('Login with Discord', 'admin-coalition') . '</a></div>';
 		}
 	}
 
@@ -100,55 +100,54 @@ class Woo_Discord_Steam_Integration_Front {
 	 * @return string The HTML for the Connect Steam button or a disconnect button with the Steam ID if already connected.
 	 */
 	public function shortcode_connect_steam($atts) {
-		wp_enqueue_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-public' );
+		wp_enqueue_style(Woo_Discord_Steam_Integration()->get_plugin_name() . '-public');
 
 		$atts = shortcode_atts(array(
-			'redirect_url' => wc_get_checkout_url(), 
+			'redirect_url' => wc_get_checkout_url(),
 		), $atts);
 
-		$redirect_url = esc_url( $atts['redirect_url'] );
+		$redirect_url = esc_url($atts['redirect_url']);
 
-		if ( is_user_logged_in() ) {
+		if (is_user_logged_in()) {
 			$user_id = get_current_user_id();
-			$steam_connected = Woo_Discord_Steam_Integration_Utils::is_user_connected_to_steam( $user_id );
-			$steam_personaname = Woo_Discord_Steam_Integration_Utils::get_steam_username( $user_id );
-			$steam_avatar = Woo_Discord_Steam_Integration_Utils::get_steam_avatar( $user_id );
+			$steam_connected = Woo_Discord_Steam_Integration_Utils::is_user_connected_to_steam($user_id);
+			$steam_personaname = Woo_Discord_Steam_Integration_Utils::get_steam_username($user_id);
+			// $steam_avatar = Woo_Discord_Steam_Integration_Utils::get_steam_avatar($user_id);
 
 			if (!$steam_connected) {
 				$steam_login_url = Woo_Discord_Steam_Integration_Utils::get_steam_login_url($redirect_url);
-				return '<div class="ets_shortcode_wrapper"><a href="' . esc_url( $steam_login_url ) . '" class="button alt connect-button"><span class="logo steam-logo"></span>' . __( 'Login with Steam', 'admin-coalition' ) . '</a></div>';
+				return '<div class="ets_shortcode_wrapper"><a href="' . esc_url($steam_login_url) . '" class="button ets-alt connect-button steam-button"><span class="logo steam-logo"></span>' . __('Login with Steam', 'admin-coalition') . '</a></div>';
 			} else {
-				$steam_avatar_img = '<img src="' . esc_url( $steam_avatar ) . '" alt="' . esc_attr( $steam_personaname ) . '" style="width:50px;height:50px;border-radius:50%;">';
-				$steam_id_display = $steam_personaname ? '<div class="ets_shortcode_wrapper connected"><span class="logo steam-logo"></span>' . __('Connected to Steam as: ', 'admin-coalition') . esc_html( $steam_personaname ) . $steam_avatar_img . '</div>' : '';
+				// $steam_avatar_img = '<img src="' . esc_url($steam_avatar) . '" alt="' . esc_attr($steam_personaname) . '" style="width:50px;height:50px;border-radius:50%;">';
+				$steam_id_display = $steam_personaname ? '<div class="ets_shortcode_wrapper connected"><span class="logo steam-logo"></span>' . __('Connected to Steam as: ', 'admin-coalition') . esc_html( $steam_personaname ) . '</div>' : '';
 				return $steam_id_display;
 			}
 		} else {
 			$steam_login_url = Woo_Discord_Steam_Integration_Utils::get_steam_login_url($redirect_url);
-			return '<div class="ets_shortcode_wrapper"><a href="' . esc_url( $steam_login_url ) . '" class="button alt connect-button"><span class="logo steam-logo"></span>' . __( 'Login with Steam', 'admin-coalition' ) . '</a></div>';
+			return '<div class="ets_shortcode_wrapper"><a href="' . esc_url($steam_login_url) . '" class="button ets-alt connect-button steam-button"><span class="logo steam-logo"></span>' . __('Login with Steam', 'admin-coalition') . '</a></div>';
 		}
 	}
 
+	/**
+	 * Register the [ets_discord] shortcode to display the Connect Discord button or the connected Discord username.
+	 *
+	 * @return string The HTML for the Connect Discord button or a disconnect button with the Discord username if already connected.
+	 */
+	public function shortcode_ets_discord() {
+		if (is_user_logged_in()) {
+			$user_id = get_current_user_id();
+			$discord_connected = Woo_Discord_Steam_Integration_Utils::is_user_connected_to_discord($user_id);
+			$discord_username = Woo_Discord_Steam_Integration_Utils::get_discord_user_name($user_id);
 
-/**
- * Register the [ets_discord] shortcode to display the Connect Discord button or the connected Discord username.
- *
- * @return string The HTML for the Connect Discord button or a disconnect button with the Discord username if already connected.
- */
-public function shortcode_ets_discord() {
-    if ( is_user_logged_in() ) {
-        $user_id = get_current_user_id();
-        $discord_connected = Woo_Discord_Steam_Integration_Utils::is_user_connected_to_discord( $user_id );
-        $discord_username = Woo_Discord_Steam_Integration_Utils::get_discord_user_name( $user_id );
-
-        if ( ! $discord_connected ) {
-            return $this->get_connect_discord_button( false );
-        } else {
-            return $this->get_connect_discord_button(true, $discord_username);
-        }
-    } else {
-        return $this->get_connect_discord_button(false);
-    }
-}
+			if (!$discord_connected) {
+				return $this->get_connect_discord_button(false);
+			} else {
+				return $this->get_connect_discord_button(true, $discord_username);
+			}
+		} else {
+			return $this->get_connect_discord_button(false);
+		}
+	}
 
 /**
  * Register the [ets_steam] shortcode to display the Connect Steam button or the connected Steam username.
@@ -156,13 +155,13 @@ public function shortcode_ets_discord() {
  * @return string The HTML for the Connect Steam button or a disconnect button with the Steam username if already connected.
  */
 public function shortcode_ets_steam() {
-    if ( is_user_logged_in() ) {
+    if (is_user_logged_in()) {
         $user_id = get_current_user_id();
-        $steam_connected = Woo_Discord_Steam_Integration_Utils::is_user_connected_to_steam( $user_id );
-        $steam_personaname = Woo_Discord_Steam_Integration_Utils::get_steam_username( $user_id );
+        $steam_connected = Woo_Discord_Steam_Integration_Utils::is_user_connected_to_steam($user_id);
+        $steam_personaname = Woo_Discord_Steam_Integration_Utils::get_steam_username($user_id);
 
-        if ( ! $steam_connected ) {
-            return $this->get_connect_steam_button( false );
+        if (!$steam_connected) {
+            return $this->get_connect_steam_button(false);
         } else {
             return $this->get_connect_steam_button(true, $steam_personaname);
         }
@@ -170,6 +169,7 @@ public function shortcode_ets_steam() {
         return $this->get_connect_steam_button(false);
     }
 }
+
 
 
 	/**
@@ -414,19 +414,19 @@ public function shortcode_ets_steam() {
 
 	public function get_connect_discord_button($connected = false, $username = '') {
 		if ($connected) {
-			return '<a href="#" class="connect-button connected"><span class="logo discord-logo"></span>Connected: ' . esc_html($username) . '</a>';
+			return '<div class="ets_shortcode_wrapper"><a href="#" class="connect-button connected"><span class="logo discord-logo"></span>Connected: ' . esc_html($username) . '</a></div>';
 		} else {
 			$discord_login_url = Woo_Discord_Steam_Integration_Utils::get_discord_login_url();
-			return '<a href="' . esc_url( $discord_login_url ) . '" class="connect-button"><span class="logo discord-logo"></span>Login with Discord</a>';
+			return '<div class="ets_shortcode_wrapper"><a href="' . esc_url( $discord_login_url ) . '" class="button ets-alt connect-button discord-button"><span class="logo discord-logo"></span>Login with Discord</a></div>';
 		}
 	}
 	
 	public function get_connect_steam_button($connected = false, $username = '') {
 		if ($connected) {
-			return '<a href="#" class="connect-button connected"><span class="logo steam-logo"></span>Connected: ' . esc_html($username) . '</a>';
+			return '<div class="ets_shortcode_wrapper"><a href="#" class="connect-button connected"><span class="logo steam-logo"></span>Connected: ' . esc_html($username) . '</a></div>';
 		} else {
 			$steam_login_url = Woo_Discord_Steam_Integration_Utils::get_steam_login_url();
-			return '<a href="' . esc_url( $steam_login_url ) . '" class="connect-button"><span class="logo steam-logo"></span>Login with Steam</a>';
+			return '<div class="ets_shortcode_wrapper"><a href="' . esc_url( $steam_login_url ) . '" class="button ets-alt connect-button steam-button"><span class="logo steam-logo"></span>Login with Steam</a></div>';
 		}
 	}
 	
@@ -503,6 +503,7 @@ public function shortcode_ets_steam() {
 			wc_add_notice( __( '<strong>Connecting Steam</strong> is required.', 'admin-coalition' ), 'error' );
 		}
 	}
+	
 	
 
 
