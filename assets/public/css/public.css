@@ -1,33 +1,43 @@
 /* Discord Button */
-.button.discord-login-button {
-    background-color: #7289da;
+.button.discord-login-button,
+.ets_shortcode_wrapper a.button.ets-alt.connect-button.discord-button {
+    background-color: #5662f6; /* Solid Discord Blue */
     color: #fff;
     text-align: center;
     padding: 10px 20px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     margin-top: 20px;
-    border-radius: 4px;
+    border-radius: 10px; /* Unified border radius */
     text-decoration: none;
+    font-weight: bold;
 }
-
-.button.discord-login-button:hover {
-    background-color: #5a6ea6;
+.ets_shortcode_wrapper > a::after{
+    opacity: 0!important;
+}
+.button.discord-login-button:hover,
+.ets_shortcode_wrapper a.button.ets-alt.connect-button.discord-button:hover {
+    background-color: #404ecf; /* Slightly darker on hover */
 }
 
 /* Steam Button */
-.button.steam-login-button {
-    background-color: #171a21;
+.button.steam-login-button,
+.ets_shortcode_wrapper a.button.ets-alt.connect-button.steam-button {
+    background: linear-gradient(to bottom, #1c2c4c, #4c8ebb); /* Gradient for Steam Button */
     color: #fff;
     text-align: center;
     padding: 10px 20px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     margin-top: 20px;
-    border-radius: 4px;
+    border-radius: 10px; /* Unified border radius */
     text-decoration: none;
+    font-weight: bold;
 }
 
-.button.steam-login-button:hover {
-    background-color: #1b4b7e;
+.button.steam-login-button:hover,
+.ets_shortcode_wrapper a.button.ets-alt.connect-button.steam-button:hover {
+    background: linear-gradient(to bottom, #162542, #3a75a3); /* Slightly darker gradient on hover */
 }
 
 /* Hidden Class */
@@ -43,21 +53,13 @@
     margin-right: 15px;
 }
 
-.ets_shortcode_wrapper a.button.alt {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
+.ets_shortcode_wrapper a.button.ets-alt,
+.connect-button {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #007cba; /* WordPress button blue color */
-    color: #fff;
     text-decoration: none;
-    border-radius: 3px;
-    transition: background-color 0.3s ease;
-}
-
-.ets_shortcode_wrapper a.button.alt:hover {
-    background-color: #005a8e; /* Darker blue for hover */
+    border-radius: 10px; /* Unified border radius */
+    transition: background-color 0.3s ease, border-radius 0.3s ease;
 }
 
 /* Connected State Styling */
@@ -65,10 +67,16 @@
     background-color: #f0f0f0;
     border: 1px solid #ddd;
     padding: 10px;
-    border-radius: 4px;
+    border-radius: 10px; /* Unified border radius */
     display: inline-flex;
     align-items: center;
     margin-bottom: 15px;
+    font-weight: 700;
+    color: #333;
+}
+
+.ets_shortcode_wrapper.connected:hover {
+    background-color: #e0e0e0;
 }
 
 .ets_shortcode_wrapper.connected .logo {
@@ -79,24 +87,11 @@
     background-repeat: no-repeat;
 }
 
-.ets_shortcode_wrapper.connected .logo.discord-logo {
-    background-image: url('../images/discord-logo.png');
-}
-
-.ets_shortcode_wrapper.connected .logo.steam-logo {
-    background-image: url('../images/steam-logo.png');
-}
-
 .ets_shortcode_wrapper.connected img {
     margin-left: 10px;
     width: 50px;
     height: 50px;
     border-radius: 50%;
-}
-
-/* Connected State Hover */
-.ets_shortcode_wrapper.connected:hover {
-    background-color: #e0e0e0;
 }
 
 /* Ensure buttons appear on the same line */
@@ -137,11 +132,11 @@
 
 /* Connect Button Style */
 .connect-button {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     background-color: #ffffff;
     border: 1px solid #ddd;
-    border-radius: 2px;
+    border-radius: 10px; /* Unified border radius */
     padding: 10px 15px;
     text-decoration: none;
     color: #333;
@@ -159,17 +154,22 @@
     background-repeat: no-repeat;
 }
 
-.connect-button .logo.discord-logo {
+.connect-button.discord-button .logo.discord-logo,
+.ets_shortcode_wrapper .logo.discord-logo {
     background-image: url('../images/discord-logo.png');
+    filter: brightness(0) invert(1);
 }
 
-.connect-button .logo.steam-logo {
-    background-image: url('../images/steam-logo.png');
+.connect-button.steam-button .logo.steam-logo,
+.ets_shortcode_wrapper .logo.steam-logo {
+    background-image: url('../images/steam-logo-white.png');
+    filter: brightness(0) invert(1);
 }
 
 /* Connected Button State */
 .connect-button.connected {
     background-color: #f0f0f0;
+    cursor: default!important;
 }
 
 .connect-button.connected:hover {

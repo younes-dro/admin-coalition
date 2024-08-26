@@ -199,6 +199,7 @@ class Woo_Discord_Steam_Integration_Utils {
 				$channel_options[ $channel['id'] ] = $channel['name'];
 			}
 		}
+		asort( $channel_options );
 		$channel_options = array( 0 => '---' ) + $channel_options;
 		// //error_log( print_r( $channel_options, true ) );
 		
@@ -393,7 +394,7 @@ class Woo_Discord_Steam_Integration_Utils {
 	 * @return string The URL of the top-level menu icon.
 	 */
 	public static function get_top_level_menu_icon() {
-		return Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/images/icon
+		return Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/images/image
 		.png';
 	}
 
