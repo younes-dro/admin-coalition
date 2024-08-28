@@ -81,6 +81,12 @@
     margin-bottom: 20px;
     text-align: left;
 }
+.woo-discord-steam-info p.description{
+    font-size: 1rem;
+}
+.woo-discord-steam-info p.description code{
+    font-size: 1rem!important;
+}
 .woo-discord-steam-bot-connected {
     display: inline-flex;
     justify-content: center;
