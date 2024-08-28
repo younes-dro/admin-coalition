@@ -153,6 +153,10 @@
     background-size: contain;
     background-repeat: no-repeat;
 }
+.connect-button span.logo.connected {
+    width: 50px;
+    height: 30px;
+}
 
 .connect-button.discord-button .logo.discord-logo,
 .ets_shortcode_wrapper .logo.discord-logo {
