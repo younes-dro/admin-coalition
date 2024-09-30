@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Woo_Discord_Steam_Integration_Front {
 
 
+
 	/**
 	 * Instance of the Discord handler.
 	 *
@@ -63,7 +64,7 @@ class Woo_Discord_Steam_Integration_Front {
 	/**
 	 * Register the [login_with_discord] shortcode to display the Login with Discord button or the connected Discord username.
 	 *
-	 * @param array $atts Shortcode attributes.
+	 * @param  array $atts Shortcode attributes.
 	 * @return string The HTML for the Connect Discord button or a disconnect button with the Discord username if already connected.
 	 */
 	public function shortcode_connect_discord( $atts ) {
@@ -71,7 +72,7 @@ class Woo_Discord_Steam_Integration_Front {
 
 		$atts = shortcode_atts(
 			array(
-				'redirect_url' => wc_get_checkout_url(),
+				'redirect_url' => add_query_arg( 'via', 'discord', wc_get_checkout_url() ),
 			),
 			$atts
 		);
@@ -96,10 +97,11 @@ class Woo_Discord_Steam_Integration_Front {
 		}
 	}
 
+
 	/**
 	 * Register the [login_with_steam] shortcode to display the Login with Steam button or the connected Steam ID.
 	 *
-	 * @param array $atts Shortcode attributes.
+	 * @param  array $atts Shortcode attributes.
 	 * @return string The HTML for the Connect Steam button or a disconnect button with the Steam ID if already connected.
 	 */
 	public function shortcode_connect_steam( $atts ) {
@@ -236,9 +238,9 @@ class Woo_Discord_Steam_Integration_Front {
 					);
 
 					if ( ! empty( $existing_user ) ) {
-						// Log in the existing user
-						$user_id = $existing_user[0];
-						wp_set_auth_cookie( $user_id, false, '', '' );
+								// Log in the existing user
+								$user_id = $existing_user[0];
+								wp_set_auth_cookie( $user_id, false, '', '' );
 					} else {
 						// No user found, create a new one
 						$personaname = $steam_user_data['personaname'] ?? 'SteamUser';
@@ -295,7 +297,7 @@ class Woo_Discord_Steam_Integration_Front {
 	 * This method processes the response returned by Steam during OpenID authentication.
 	 * It extracts and returns the Steam ID if the response is valid.
 	 *
-	 * @param array $response The OpenID response array returned by Steam.
+	 * @param  array $response The OpenID response array returned by Steam.
 	 * @return string|false The extracted Steam ID if valid, or false if validation fails.
 	 */
 	private function validate_openid_response( $response ) {
@@ -318,7 +320,7 @@ class Woo_Discord_Steam_Integration_Front {
 	 * If the user is logged in but not connected to both Discord and Steam, it replaces the "Place Order" button
 	 * with appropriate messages and buttons to connect to Discord and Steam.
 	 *
-	 * @param string $button The original HTML of the "Place Order" button.
+	 * @param  string $button The original HTML of the "Place Order" button.
 	 * @return string Modified HTML of the "Place Order" button or replacement content.
 	 */
 	public function custom_place_order_button_html( $button ) {
@@ -372,7 +374,7 @@ class Woo_Discord_Steam_Integration_Front {
 	 * This method checks if the user is connected to Discord. If the user is not connected,
 	 * it displays a message and a button to connect to Discord.
 	 *
-	 * @param mixed $checkout
+	 * @param  mixed $checkout
 	 * @return void Outputs the HTML content.
 	 */
 	public function add_connect_discord_button_billing_form( $checkout ) {
@@ -480,9 +482,9 @@ class Woo_Discord_Steam_Integration_Front {
 	/**
 	 * Log purchase message after order is placed.
 	 *
-	 * @param int      $order_id The order ID.
+	 * @param int      $order_id    The order ID.
 	 * @param array    $posted_data The array of posted data.
-	 * @param WC_Order $order The order object.
+	 * @param WC_Order $order       The order object.
 	 */
 	public function log_purchase_message( $order_id, $posted_data, $order ) {
 		$user_id     = $order->get_user_id();
