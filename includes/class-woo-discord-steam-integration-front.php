@@ -87,7 +87,7 @@ class Woo_Discord_Steam_Integration_Front {
 				$auth_url = add_query_arg( 'redirect_url', urlencode( $redirect_url ), '?action=discord-auth' );
 				return '<div class="ets_shortcode_wrapper"><a href="' . esc_url( $auth_url ) . '" class="button ets-alt connect-button discord-button"><span class="logo discord-logo"></span>' . __( 'Login with Discord', 'admin-coalition' ) . '</a></div>';
 			} else {
-				$username_display = $discord_username ? '<div class="ets_shortcode_wrapper connected"><span class="logo discord-logo"></span>' . __( 'Connected to Discord as: ', 'admin-coalition' ) . esc_html( $discord_username ) . '</div>' : '';
+				$username_display = $discord_username ? '<div class="ets_shortcode_wrapper"><a href="#" class="button ets-alt connect-button discord-button"><span class="logo connected discord-logo"></span>' . __( 'Connected to Discord as: ', 'admin-coalition' ) . esc_html( $discord_username ) . '</a></div>' : '';
 				return $username_display;
 			}
 		} else {
@@ -125,7 +125,7 @@ class Woo_Discord_Steam_Integration_Front {
 				return '<div class="ets_shortcode_wrapper"><a href="' . esc_url( $steam_login_url ) . '" class="button ets-alt connect-button steam-button"><span class="logo steam-logo"></span>' . __( 'Login with Steam', 'admin-coalition' ) . '</a></div>';
 			} else {
 				// $steam_avatar_img = '<img src="' . esc_url($steam_avatar) . '" alt="' . esc_attr($steam_personaname) . '" style="width:50px;height:50px;border-radius:50%;">';
-				$steam_id_display = $steam_personaname ? '<div class="ets_shortcode_wrapper connected"><span class="logo steam-logo"></span>' . __( 'Connected to Steam as: ', 'admin-coalition' ) . esc_html( $steam_personaname ) . '</div>' : '';
+				$steam_id_display = $steam_personaname ? '<div class="ets_shortcode_wrapper"><a href="#" class="button ets-alt connect-button steam-button"><span class="logo connected steam-logo"></span>' . __( 'Connected to Steam as: ', 'admin-coalition' ) . esc_html( $steam_personaname ) . '</a></div>' : '';
 				return $steam_id_display;
 			}
 		} else {
@@ -419,7 +419,7 @@ class Woo_Discord_Steam_Integration_Front {
 
 	public function get_connect_discord_button( $connected = false, $username = '' ) {
 		if ( $connected ) {
-			return '<div class="ets_shortcode_wrapper"><a href="#" class="connect-button connected"><span class="logo discord-logo"></span>Connected: ' . esc_html( $username ) . '</a></div>';
+			return '<div class="ets_shortcode_wrapper"><a href="#" class="button ets-alt connect-button discord-button"><span class="logo connected discord-logo"></span>Connected: ' . esc_html( $username ) . '</a></div>';
 		} else {
 			$discord_login_url = Woo_Discord_Steam_Integration_Utils::get_discord_login_url();
 			return '<div class="ets_shortcode_wrapper"><a href="' . esc_url( $discord_login_url ) . '" class="button ets-alt connect-button discord-button"><span class="logo discord-logo"></span>Login with Discord</a></div>';
@@ -428,7 +428,7 @@ class Woo_Discord_Steam_Integration_Front {
 
 	public function get_connect_steam_button( $connected = false, $username = '' ) {
 		if ( $connected ) {
-			return '<div class="ets_shortcode_wrapper"><a href="#" class="connect-button connected"><span class="logo steam-logo"></span>Connected: ' . esc_html( $username ) . '</a></div>';
+			return '<div class="ets_shortcode_wrapper"><a href="#" class="button ets-alt connect-button steam-button"><span class="logo connected steam-logo"></span>Connected: ' . esc_html( $username ) . '</a></div>';
 		} else {
 			$steam_login_url = Woo_Discord_Steam_Integration_Utils::get_steam_login_url();
 			return '<div class="ets_shortcode_wrapper"><a href="' . esc_url( $steam_login_url ) . '" class="button ets-alt connect-button steam-button"><span class="logo steam-logo"></span>Login with Steam</a></div>';
