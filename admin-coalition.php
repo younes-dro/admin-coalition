@@ -7,7 +7,7 @@
  * Author URI:      https://www.expresstechsoftwares.com/
  * Text Domain:     'admin-coalition'
  * Domain Path:     /languages
- * Version:         1.0.0
+ * Version:         1.1.0
  *
  * @package         Woo_Discord_Steam_Integration
  */
