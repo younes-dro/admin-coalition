@@ -350,7 +350,8 @@ public function create_discord_auth_token( $code, $user_id, $redirect_uri = null
 			return;
 		}
 
-		$guild_id          = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		// $guild_id          = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		$guild_id = sanitize_text_field(trim(get_option('discord_saved_server')));
 		$discord_bot_token = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
 
 		$guilds_memeber_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id;

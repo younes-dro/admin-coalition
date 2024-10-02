@@ -21,6 +21,9 @@ $discord_server_id_2         = sanitize_text_field(trim(get_option('discord_serv
 
 $first_server_status = Woo_Discord_Steam_Integration_Utils::get_single_server_status($discord_server_id, $discord_bot_token, $discord_client_id, 'First Server');
 
+$discord_saved_server  = sanitize_text_field(trim(get_option('discord_saved_server')));
+$discord_servers = Woo_Discord_Steam_Integration_Utils::get_saved_servers_menu();
+
 $steam_web_api_key = sanitize_text_field(trim(get_option('steam_web_api_key')));
 
 ?>
@@ -124,6 +127,18 @@ $steam_web_api_key = sanitize_text_field(trim(get_option('steam_web_api_key')));
     <p><?php echo Woo_Discord_Steam_Integration_Utils::get_single_server_status($discord_server_id_2, $discord_bot_token, $discord_client_id, 'Second Server'); ?></p>
     </div>
 
+    <table class="form_table">
+    <tr>
+            <th scope="row"><label for="discord_saved_server"><?php esc_html_e('Select discord server', 'admin-coalition'); ?></label></th>
+            <td>
+                <select id="discord_saved_server" name="discord_saved_server" class="regular-text">
+                    <?php foreach ($discord_servers as $server_id => $server_name): ?>
+                        <option value="<?php echo esc_attr($server_id); ?>" <?php selected($discord_saved_server, $server_id); ?>><?php echo esc_html($server_name); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </td>
+        </tr>
+    </table>
 
     <!-- Steam Settings -->
     <h2><?php esc_html_e('Steam Details', 'admin-coalition'); ?></h2>

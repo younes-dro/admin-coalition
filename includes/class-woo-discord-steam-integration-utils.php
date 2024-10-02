@@ -464,4 +464,18 @@ class Woo_Discord_Steam_Integration_Utils {
 	public static function get_settings_page_icon() {
 		return Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/images/settings.png';
 	}
+
+	public static function get_saved_servers_menu(){
+		$discord_server_id         = sanitize_text_field(trim(get_option('discord_server_id')));
+		$discord_server_id_2         = sanitize_text_field(trim(get_option('discord_server_id_2')));
+
+		$servers = array();
+		$servers[$discord_server_id] = 'Server 1';
+		if( !empty($discord_server_id_2)){
+			$servers[$discord_server_id_2] = 'Server 2';
+		}
+
+		return $servers;
+
+	}
 }

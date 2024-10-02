@@ -164,6 +164,9 @@ class Woo_Discord_Steam_Integration_Admin {
 		if ( isset( $_POST['discord_purchase_channel'] ) ) {
 			update_option( 'discord_purchase_channel', sanitize_text_field( $_POST['discord_purchase_channel'] ) );
 		}
+		if ( isset( $_POST['discord_saved_server'] ) ) {
+			update_option( 'discord_saved_server', sanitize_text_field( $_POST['discord_saved_server'] ) );
+		}		
 		if ( isset( $_POST['steam_web_api_key'] ) ){
 			update_option( 'steam_web_api_key', sanitize_text_field( $_POST['steam_web_api_key'] ) );
 		}
