@@ -105,6 +105,8 @@ class Woo_Discord_Steam_Integration_Admin {
 	 */
 	public function save_settings() {
 
+		// error_log( print_r( $_POST, true ) );
+
 		if ( ! isset( $_POST['discord_steam_settings_nonce'] ) || ! wp_verify_nonce( $_POST['discord_steam_settings_nonce'], 'save_discord_steam_settings' ) ) {
 			wp_die( __( 'Nonce verification failed', 'admin-coalition' ) );
 		}
@@ -117,6 +119,9 @@ class Woo_Discord_Steam_Integration_Admin {
 			delete_option( 'discord_server_id' );
 			delete_option( 'discord_client_id' );
 			delete_option( 'discord_client_secret' );
+			// delete_option( 'discord_server_id_2' );
+			// delete_option( 'discord_client_id_2' );
+			// delete_option( 'discord_client_secret_2' );
 			delete_option( 'discord_bot_token' );
 			delete_option( 'discord_bot_redirect_url' );
 			delete_option( 'discord_auth_redirect_url' );
@@ -138,6 +143,15 @@ class Woo_Discord_Steam_Integration_Admin {
 		if ( isset( $_POST['discord_client_secret'] ) ) {
 			update_option( 'discord_client_secret', sanitize_text_field( $_POST['discord_client_secret'] ) );
 		}
+		if ( isset( $_POST['discord_server_id_2'] ) ) {
+			update_option( 'discord_server_id_2', sanitize_text_field( $_POST['discord_server_id_2'] ) );
+		}
+		// if ( isset( $_POST['discord_client_id_2'] ) ) {
+		// 	update_option( 'discord_client_id_2', sanitize_text_field( $_POST['discord_client_id_2'] ) );
+		// }
+		// if ( isset( $_POST['discord_client_secret_2'] ) ) {
+		// 	update_option( 'discord_client_secret_2', sanitize_text_field( $_POST['discord_client_secret_2'] ) );
+		// }		
 		if ( isset( $_POST['discord_bot_token'] ) ) {
 			update_option( 'discord_bot_token', sanitize_text_field( $_POST['discord_bot_token'] ) );
 		}
@@ -172,12 +186,16 @@ class Woo_Discord_Steam_Integration_Admin {
 				wp_send_json_error( 'You do not have sufficient rights', 403 );
 				exit();
 			}
+			$server_number = intval( $_GET['server_number'] );
+			$server_suffix = ( isset( $server_number) && $server_number == 2 ) ? '_2' : '';
+			$discord_server_id         = sanitize_text_field( trim( get_option('discord_server_id' . $server_suffix ) ) );
+
 			$params                    = array(
 				'client_id'            => sanitize_text_field( trim( get_option( 'discord_client_id' ) ) ),
 				'permissions'          => Woo_Discord_Steam_Integration_Constants::DISCORD_BOT_PERMISSIONS,
 				'response_type'        => 'code',
 				'scope'                => 'bot',
-				'guild_id'             => sanitize_text_field( trim( get_option( 'discord_server_id' ) ) ),
+				'guild_id'             => $discord_server_id,
 				'disable_guild_select' => 'true',
 				'redirect_uri'         => sanitize_text_field( trim( get_option( 'discord_bot_redirect_url' ) ) ),
 			);

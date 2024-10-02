@@ -69,6 +69,7 @@ class Woo_Discord_Steam_Integration_Utils {
 	 * @return string
 	 */
 	public static function get_single_server_status( $guild_id, $discord_bot_token, $client_id, $server_label ) {
+		// error_log("Checking server status with params: guild_id={$guild_id}, bot_token={$discord_bot_token}, client_id={$client_id}, server_label={$server_label}");
 		return self::check_single_server_status( $guild_id, $discord_bot_token, $client_id, $server_label );
 	}
 
@@ -78,6 +79,9 @@ class Woo_Discord_Steam_Integration_Utils {
 	 * Check the bot status connection.
 	 *
 	 * @since 1.0.0
+	 * @deprecated 1.1.0 This method is deprecated and replaced by a new approach to handle multiple servers.
+	 * The current system handles both the first and second servers via separate options.
+	 * Please use the server-specific connection checks to handle individual server connections.
 	 *
 	 * @return string HTML output indicating the status of the bot connection.
 	 */
@@ -134,8 +138,9 @@ class Woo_Discord_Steam_Integration_Utils {
 			if ( array_key_exists( 'code', $response_arr ) || array_key_exists( 'error', $response_arr ) ) {
 				// Handle specific error codes
 				if ( $response_arr['code'] === 10004 ) {
+					$server_number = ($server_label === 'First Server') ? 1 : 2;
 					// Server ID is wrong or the bot is not connected to the server
-					$bot_button .= '<a href="?action=woo-discord-steam-connect-to-bot" class="button-primary woo-discord-steam-error woo-discord-steam-connect-to-bot" id="woo-discord-steam-connect-discord-bot">' . esc_html__( 'Connect your Bot to ' . $server_label, 'admin-coalition' ) . self::get_discord_logo_white() . '</a>';
+					$bot_button .= '<a href="?action=woo-discord-steam-connect-to-bot&server_number=' . $server_number . '" class="button-primary woo-discord-steam-error woo-discord-steam-connect-to-bot" id="woo-discord-steam-connect-discord-bot">' . esc_html__( 'Connect your Bot to ' . $server_label, 'admin-coalition' ) . self::get_discord_logo_white() . '</a>';
 					$bot_button .= '<b>The server ID is wrong or you did not connect the Bot to ' . $server_label . '.</b>';
 					return $bot_button;
 				} elseif ( $response_arr['code'] === 0 && $response_arr['message'] == '401: Unauthorized' ) {
@@ -171,6 +176,7 @@ class Woo_Discord_Steam_Integration_Utils {
 				// Save roles for each server separately
 				update_option( 'discord_all_roles_' . $guild_id, serialize( $discord_roles ) );
 
+				// error_log( print_r( $bot_button, true ) );
 				return $bot_button;
 			}
 		}
