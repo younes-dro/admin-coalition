@@ -127,7 +127,7 @@ $steam_web_api_key = sanitize_text_field( trim( get_option( 'steam_web_api_key' 
 	<p><?php echo Woo_Discord_Steam_Integration_Utils::get_single_server_status( $discord_server_id_2, $discord_bot_token, $discord_client_id, 'Second Server' ); ?></p>
 	</div>
 
-	<table class="form_table">
+	<table class="form-table">
 	<tr>
 			<th scope="row"><label for="discord_saved_server"><?php esc_html_e( 'Select discord server', 'admin-coalition' ); ?></label></th>
 			<td>
