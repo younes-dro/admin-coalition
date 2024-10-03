@@ -220,29 +220,7 @@ class Woo_Discord_Steam_Integration_Admin {
 	 */
 	public function add_discord_product_data_fields() {
 		global $post;
-		?>
-		<div id="discord_product_data" class="panel woocommerce_options_panel">
-			<?php
-			$selected_role = get_post_meta( $post->ID, '_ets_discord_role_id', true );
-			$discord_roles = get_option( 'discord_all_roles', array() );
-			if ( ! is_array( $discord_roles ) ) {
-				$discord_roles = unserialize( $discord_roles );
-			}
-			asort( $discord_roles );
-			$discord_roles = array( '0' => __( 'Select a role', 'admin-coalition' ) ) + $discord_roles;
-
-			woocommerce_wp_select(
-				array(
-					'id'          => '_ets_discord_role_id',
-					'label'       => __( 'Discord Role', 'admin-coalition' ),
-					'options'     => $discord_roles,
-					'value'       => $selected_role,
-					'description' => __( 'Select a Discord role to assign when this product is purchased.', 'admin-coalition' ),
-				)
-			);
-			?>
-		</div>
-		<?php
+		wc_get_template( 'product/discord-product-data-fields.php', array('product_id' => $post->ID), '',  Woo_Discord_Steam_Integration()->plugin_path() . '/templates/');
 	}
 
 	/**
