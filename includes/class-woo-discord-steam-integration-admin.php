@@ -51,7 +51,6 @@ class Woo_Discord_Steam_Integration_Admin {
 	public function enqueue_styles( $hook ) {
 
 		wp_register_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/css/admin.css', array(), time() );
-
 	}
 
 
@@ -73,7 +72,6 @@ class Woo_Discord_Steam_Integration_Admin {
 			'ets-woo_discord_steam_nonce' => wp_create_nonce( 'ets-woo-discord--steam-ajax-nonce' ),
 		);
 		wp_localize_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', 'etsWooDiscordSteamParams', $script_params );
-
 	}
 
 
@@ -129,7 +127,7 @@ class Woo_Discord_Steam_Integration_Admin {
 			delete_option( 'steam_web_api_key' );
 			delete_option( 'discord_all_roles' );
 			delete_option( 'discord_roles_color' );
-	
+
 			wp_redirect( admin_url( 'admin.php?page=admin-coalition&settings-reset=true' ) );
 			exit;
 		}
@@ -147,11 +145,11 @@ class Woo_Discord_Steam_Integration_Admin {
 			update_option( 'discord_server_id_2', sanitize_text_field( $_POST['discord_server_id_2'] ) );
 		}
 		// if ( isset( $_POST['discord_client_id_2'] ) ) {
-		// 	update_option( 'discord_client_id_2', sanitize_text_field( $_POST['discord_client_id_2'] ) );
+		// update_option( 'discord_client_id_2', sanitize_text_field( $_POST['discord_client_id_2'] ) );
 		// }
 		// if ( isset( $_POST['discord_client_secret_2'] ) ) {
-		// 	update_option( 'discord_client_secret_2', sanitize_text_field( $_POST['discord_client_secret_2'] ) );
-		// }		
+		// update_option( 'discord_client_secret_2', sanitize_text_field( $_POST['discord_client_secret_2'] ) );
+		// }
 		if ( isset( $_POST['discord_bot_token'] ) ) {
 			update_option( 'discord_bot_token', sanitize_text_field( $_POST['discord_bot_token'] ) );
 		}
@@ -166,11 +164,10 @@ class Woo_Discord_Steam_Integration_Admin {
 		}
 		if ( isset( $_POST['discord_saved_server'] ) ) {
 			update_option( 'discord_saved_server', sanitize_text_field( $_POST['discord_saved_server'] ) );
-		}		
-		if ( isset( $_POST['steam_web_api_key'] ) ){
+		}
+		if ( isset( $_POST['steam_web_api_key'] ) ) {
 			update_option( 'steam_web_api_key', sanitize_text_field( $_POST['steam_web_api_key'] ) );
 		}
-
 
 		wp_redirect( admin_url( 'admin.php?page=admin-coalition&settings-updated=true' ) );
 		exit;
@@ -189,9 +186,9 @@ class Woo_Discord_Steam_Integration_Admin {
 				wp_send_json_error( 'You do not have sufficient rights', 403 );
 				exit();
 			}
-			$server_number = intval( $_GET['server_number'] );
-			$server_suffix = ( isset( $server_number) && $server_number == 2 ) ? '_2' : '';
-			$discord_server_id         = sanitize_text_field( trim( get_option('discord_server_id' . $server_suffix ) ) );
+			$server_number     = intval( $_GET['server_number'] );
+			$server_suffix     = ( isset( $server_number ) && $server_number == 2 ) ? '_2' : '';
+			$discord_server_id = sanitize_text_field( trim( get_option( 'discord_server_id' . $server_suffix ) ) );
 
 			$params                    = array(
 				'client_id'            => sanitize_text_field( trim( get_option( 'discord_client_id' ) ) ),
@@ -301,7 +298,7 @@ class Woo_Discord_Steam_Integration_Admin {
 			$steam_avatar   = Woo_Discord_Steam_Integration_Utils::get_steam_avatar( $user_id );
 
 			if ( $steam_id ) {
-				$output = esc_html( $steam_id );
+				$output  = esc_html( $steam_id );
 				$output .= $steam_username ? '<br>' . esc_html( $steam_username ) : '';
 				if ( $steam_avatar ) {
 					$output .= '<br><img src="' . esc_url( $steam_avatar ) . '" alt="' . esc_attr( $steam_username ) . '" style="width:50px;height:50px;border-radius:50%;">';
@@ -336,5 +333,4 @@ class Woo_Discord_Steam_Integration_Admin {
 			$query->query_orderby = 'ORDER BY ' . $wpdb->prefix . 'usermeta.meta_value ' . ( $query->query_vars['order'] == 'ASC' ? 'asc' : 'desc' );
 		}
 	}
-
 }

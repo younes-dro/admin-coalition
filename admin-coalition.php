@@ -69,13 +69,12 @@ class Woo_Discord_Steam_Integration {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'test_order' ) );
 		add_action( 'woocommerce_payment_complete', array( $this, 'test_order' ) );
 		add_action( 'woocommerce_payment_complete_order_status_completed', array( $this, 'test_order' ) );
-
 	}
 	public function test_order( $order_id ) {
 
 		$current_action = current_action();
 
-		//error_log( print_r( " Current Action Hook : $current_action", true ) );
+		// error_log( print_r( " Current Action Hook : $current_action", true ) );
 	}
 
 	/**
@@ -164,7 +163,6 @@ class Woo_Discord_Steam_Integration {
 
 		}
 		$this->frontend_includes();
-
 	}
 
 	/**
@@ -210,7 +208,6 @@ class Woo_Discord_Steam_Integration {
 	public function plugin_url() {
 
 		return untrailingslashit( plugins_url( '/', __FILE__ ) );
-
 	}
 
 	/**
@@ -223,7 +220,6 @@ class Woo_Discord_Steam_Integration {
 	public function plugin_path() {
 
 		return untrailingslashit( plugin_dir_path( __FILE__ ) );
-
 	}
 
 	/**
@@ -236,7 +232,6 @@ class Woo_Discord_Steam_Integration {
 	public function plugin_basename() {
 
 		return plugin_basename( __FILE__ );
-
 	}
 
 	/**
@@ -270,7 +265,6 @@ class Woo_Discord_Steam_Integration {
 	public function load_textdomain() {
 		load_plugin_textdomain( 'admin-coalition', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
-
 }
 
 /**
@@ -280,7 +274,6 @@ function Woo_Discord_Steam_Integration() {
 
 	Woo_Discord_Steam_Integration::register_autoloader();
 	return Woo_Discord_Steam_Integration::start();
-
 }
 
 Woo_Discord_Steam_Integration();

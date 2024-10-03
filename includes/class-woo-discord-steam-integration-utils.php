@@ -138,7 +138,7 @@ class Woo_Discord_Steam_Integration_Utils {
 			if ( array_key_exists( 'code', $response_arr ) || array_key_exists( 'error', $response_arr ) ) {
 				// Handle specific error codes
 				if ( $response_arr['code'] === 10004 ) {
-					$server_number = ($server_label === 'First Server') ? 1 : 2;
+					$server_number = ( $server_label === 'First Server' ) ? 1 : 2;
 					// Server ID is wrong or the bot is not connected to the server
 					$bot_button .= '<a href="?action=woo-discord-steam-connect-to-bot&server_number=' . $server_number . '" class="button-primary woo-discord-steam-error woo-discord-steam-connect-to-bot" id="woo-discord-steam-connect-discord-bot">' . esc_html__( 'Connect your Bot to ' . $server_label, 'admin-coalition' ) . self::get_discord_logo_white() . '</a>';
 					$bot_button .= '<b>The server ID is wrong or you did not connect the Bot to ' . $server_label . '.</b>';
@@ -465,17 +465,16 @@ class Woo_Discord_Steam_Integration_Utils {
 		return Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/images/settings.png';
 	}
 
-	public static function get_saved_servers_menu(){
-		$discord_server_id         = sanitize_text_field(trim(get_option('discord_server_id')));
-		$discord_server_id_2         = sanitize_text_field(trim(get_option('discord_server_id_2')));
+	public static function get_saved_servers_menu() {
+		$discord_server_id   = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		$discord_server_id_2 = sanitize_text_field( trim( get_option( 'discord_server_id_2' ) ) );
 
-		$servers = array();
-		$servers[$discord_server_id] = 'Server 1';
-		if( !empty($discord_server_id_2)){
-			$servers[$discord_server_id_2] = 'Server 2';
+		$servers                       = array();
+		$servers[ $discord_server_id ] = 'Server 1';
+		if ( ! empty( $discord_server_id_2 ) ) {
+			$servers[ $discord_server_id_2 ] = 'Server 2';
 		}
 
 		return $servers;
-
 	}
 }
