@@ -32,12 +32,6 @@ class Woo_Discord_Steam_Integration_Admin {
 		add_action( 'manage_users_custom_column', array( $this, 'populate_custom_user_columns' ), 10, 3 );
 		add_action( 'pre_user_query', array( $this, 'sort_custom_columns' ) );
 
-		// Quick Edit
-		// add_filter( 'manage_edit-product_columns', array( $this, 'add_custom_product_columns' ) );
-		// add_action( 'manage_product_posts_custom_column', array( $this, 'populate_custom_product_columns' ), 10, 2 );
-		// add_action( 'quick_edit_custom_box', array( $this, 'quick_edit_discord_role_field' ), 10, 2 );
-		// add_action( 'save_post', array( $this, 'save_quick_edit_discord_role' ) );
-		// add_action( 'admin_footer', array( $this, 'enqueue_quick_edit_scripts' ) );
 	}
 
 	/**
