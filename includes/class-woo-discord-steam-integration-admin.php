@@ -45,6 +45,7 @@ class Woo_Discord_Steam_Integration_Admin {
 	public function enqueue_styles( $hook ) {
 
 		wp_register_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/css/admin.css', array(), time() );
+		wp_register_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-edit-product', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/css/edit-product.css', array(), time() );
 	}
 
 
@@ -220,6 +221,7 @@ class Woo_Discord_Steam_Integration_Admin {
 	 */
 	public function add_discord_product_data_fields() {
 		global $post;
+		wp_enqueue_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-edit-product' );
 		wc_get_template( 'product/discord-product-data-fields.php', array('product_id' => $post->ID), '',  Woo_Discord_Steam_Integration()->plugin_path() . '/templates/');
 	}
 

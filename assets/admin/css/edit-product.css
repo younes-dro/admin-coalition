@@ -1,0 +1,91 @@
+.woo-discord-steam-actions-container {
+    /* background-color: #2a2a2a; */
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.woo-discord-steam-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.woo-discord-steam-header-container h2.woo-discord-steam-header-title {
+    margin: 0;
+    font-size: 1.5em;
+    color: white;
+}
+
+.add-action-btn {
+    background-color: #3b82f6;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px; 
+}
+
+.action-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.dropdown-section {
+    margin-right: 10px;
+}
+
+.trigger-dropdown, .action-dropdown, .server-dropdown, .role-dropdown {
+    background-color: #444444;
+    color: white;
+    border: 1px solid #555555;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.then-section {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.remove-action-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.role-section {
+    margin-top: 10px;
+}
+
+.role-section label {
+    margin-right: 10px;
+}
+
+.woo-discord-steam-actions-container select.trigger-dropdown,
+.woo-discord-steam-actions-container select.action-dropdown,
+.woo-discord-steam-actions-container select.server-dropdown,
+.woo-discord-steam-actions-container select.role-dropdown {
+    color: white;
+    background-color: #444;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 8px;
+    width: 100%; 
+    max-width: 300px; 
+}
+
+.woo-discord-steam-actions-container select:focus {
+    outline: none;
+    border-color: #3b82f6; 
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+}
+
