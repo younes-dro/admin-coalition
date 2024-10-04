@@ -31,6 +31,7 @@ class Woo_Discord_Steam_Integration_Admin {
 		add_filter( 'manage_users_columns', array( $this, 'add_custom_user_columns' ) );
 		add_action( 'manage_users_custom_column', array( $this, 'populate_custom_user_columns' ), 10, 3 );
 		add_action( 'pre_user_query', array( $this, 'sort_custom_columns' ) );
+		add_action( 'wp_ajax_save_discord_actions', array( $this, 'save_discord_actions' )  );
 
 	}
 
@@ -59,7 +60,8 @@ class Woo_Discord_Steam_Integration_Admin {
 	 */
 	public function enqueue_scripts( $hook ) {
 
-		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/admin.js', array(), Woo_Discord_Steam_Integration()->get_plugin_version() );
+		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/admin.js', array( 'jquery' ), Woo_Discord_Steam_Integration()->get_plugin_version() );
+		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/discord-action.js', array( 'jquery' ), Woo_Discord_Steam_Integration()->get_plugin_version() );
 		$script_params = array(
 			'admin_ajax'                  => admin_url( 'admin-ajax.php' ),
 			'permissions_const'           => Woo_Discord_Steam_Integration_Constants::DISCORD_BOT_PERMISSIONS,
@@ -67,6 +69,7 @@ class Woo_Discord_Steam_Integration_Admin {
 			'ets-woo_discord_steam_nonce' => wp_create_nonce( 'ets-woo-discord--steam-ajax-nonce' ),
 		);
 		wp_localize_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', 'etsWooDiscordSteamParams', $script_params );
+		wp_localize_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action', 'etsWooDiscordSteamParams', $script_params );
 	}
 
 
@@ -222,6 +225,7 @@ class Woo_Discord_Steam_Integration_Admin {
 	public function add_discord_product_data_fields() {
 		global $post;
 		wp_enqueue_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-edit-product' );
+		wp_enqueue_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action' );
 		wc_get_template( 'product/discord-product-data-fields.php', array('product_id' => $post->ID), '',  Woo_Discord_Steam_Integration()->plugin_path() . '/templates/');
 	}
 
@@ -229,10 +233,18 @@ class Woo_Discord_Steam_Integration_Admin {
 	 * Save the custom fields data when the product is saved.
 	 *
 	 * @param int $post_id The ID of the post (product) being saved.
+	 * 
+	 * @deprecated to be removed. replaced by Discord Action Rules
+	 * @since 1.0.0
 	 */
 	public function save_discord_product_data( $post_id ) {
 		$discord_role_id = isset( $_POST['_ets_discord_role_id'] ) ? sanitize_text_field( $_POST['_ets_discord_role_id'] ) : '';
 		update_post_meta( $post_id, '_ets_discord_role_id', $discord_role_id );
+	}
+
+	public function save_discord_actions(){
+
+		var_dump( $_POST);
 	}
 
 
