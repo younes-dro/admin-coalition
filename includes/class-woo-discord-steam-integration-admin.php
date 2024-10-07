@@ -59,14 +59,19 @@ class Woo_Discord_Steam_Integration_Admin {
 	 * @return void
 	 */
 	public function enqueue_scripts( $hook ) {
-
-		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/admin.js', array( 'jquery' ), Woo_Discord_Steam_Integration()->get_plugin_version() );
-		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/discord-action.js', array( 'jquery' ), Woo_Discord_Steam_Integration()->get_plugin_version() );
+		$min = '.min';
+		$version = Woo_Discord_Steam_Integration()->get_plugin_version(); 
+		if( WP_DEBUG == true ){
+			$version = time();
+			$min= '';
+		}
+		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/admin.js', array( 'jquery' ),  $version);
+		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/discord-action.js', array( 'jquery' ), $version );
 		$script_params = array(
 			'admin_ajax'                  => admin_url( 'admin-ajax.php' ),
 			'permissions_const'           => Woo_Discord_Steam_Integration_Constants::DISCORD_BOT_PERMISSIONS,
 			'is_admin'                    => is_admin(),
-			'ets-woo_discord_steam_nonce' => wp_create_nonce( 'ets-woo-discord--steam-ajax-nonce' ),
+			'ets_woo_discord_steam_nonce' => wp_create_nonce( 'ets-woo-discord--steam-ajax-nonce' ),
 		);
 		wp_localize_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', 'etsWooDiscordSteamParams', $script_params );
 		wp_localize_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action', 'etsWooDiscordSteamParams', $script_params );
@@ -242,11 +247,26 @@ class Woo_Discord_Steam_Integration_Admin {
 		update_post_meta( $post_id, '_ets_discord_role_id', $discord_role_id );
 	}
 
-	public function save_discord_actions(){
+	public function save_discord_actions() {
+		
+		if (isset($_POST['product_id']) && isset($_POST['rules'])) {
+			
+			$product_id = intval($_POST['product_id']);
 
-		var_dump( $_POST);
+			delete_post_meta( $product_id, '_discord_action_rules' );
+			$rules = $_POST['rules'];
+	
+			error_log('Received rules: ' . print_r($rules, true));
+	
+			update_post_meta($product_id, '_discord_action_rules', serialize($rules));
+	
+			wp_send_json_success(array('message' => 'Actions saved successfully!'));
+		} else {
+		
+			wp_send_json_error(array('message' => 'Failed to save actions.'));
+		}
 	}
-
+	
 
 
 	/**

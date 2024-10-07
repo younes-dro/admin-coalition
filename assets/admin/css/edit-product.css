@@ -145,6 +145,9 @@ select.role-dropdown{
     box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
 }
 
+.woo-discord-steam-actions-container > div.submit{
+    float: none!important;
+}
 .submit-action-btn {
     background-color: #28a745;
     color: white;

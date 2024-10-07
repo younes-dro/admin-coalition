@@ -1,16 +1,12 @@
 (function($) {
-
-    // Click event to add a new Discord action
+    console.log(etsWooDiscordSteamParams);
     $('#add-discord-action').on('click', function(e) {
-        e.preventDefault();
-        
-        
+        e.preventDefault();        
         var lastRule = $('div.woo-discord-steam-action').last();
         var newRuleId = parseInt(lastRule.data('rule-id')) + 1;
 
         var cloned = lastRule.clone();
         cloned.attr('data-rule-id', newRuleId);
-        
 
         cloned.find('select').each(function() {
             var name = $(this).attr('name');
@@ -18,9 +14,7 @@
             $(this).attr('name', newName);
             $(this).val(''); 
         });
-
-        
-        $('div.woo-discord-steam-actions-container').append(cloned);
+        cloned.insertBefore($('.woo-steam-submit'));
     });
 
     
@@ -29,27 +23,43 @@
         $(this).closest('div.woo-discord-steam-action').remove();
     });
 
-    $('#discord_actions_form').on('submit', function(e) {
+    $('#submit-discord-actions').on('click', function(e) {
         e.preventDefault(); 
-        console.log(etsWooDiscordSteamParams);
-        var formData = $(this).serialize();
+        var discordDivs = $('.woo-discord-steam-action'); 
+        const dataRules = {}; 
+    
+        discordDivs.each(function(index) {
+            var ruleId = $(this).data('rule-id'); 
+            dataRules[ruleId] = {}; 
+            
+            
+            $(this).find('select').each(function() {
+                var fieldName = $(this).attr('name').replace(/\[\d+\]/, ''); 
+                dataRules[ruleId][fieldName] = $(this).val(); 
+            });
+        });
+    
         var product_id = $('#woo-discord-steam-product-id').val();
+    
+        
         $.ajax({
-            url: etsWooDiscordSteamParams.admin_ajax, 
+            url: etsWooDiscordSteamParams.admin_ajax,
             method: 'POST',
             data: {
-                action: 'save_discord_actions', 
-                product_id: product_id, 
-                form_data: formData
+                action: 'save_discord_actions',
+                ets_woo_discord_steam_nonce: etsWooDiscordSteamParams.ets_woo_discord_steam_nonce,
+                product_id: product_id,
+                rules: dataRules 
             },
             success: function(response) {
-                console.log(response);
-                alert('Actions saved successfully!');
+                console.log('Actions saved successfully:', response);
             },
             error: function() {
                 alert('There was an error saving the actions.');
             }
         });
     });
+    
+    
 })(jQuery);
 
