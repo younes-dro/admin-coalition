@@ -27,12 +27,10 @@ class Woo_Discord_Steam_Integration_Admin {
 		add_action( 'admin_init', array( $this, 'discord_connect_bot' ) );
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'add_discord_product_data_tab' ) );
 		add_action( 'woocommerce_product_data_panels', array( $this, 'add_discord_product_data_fields' ) );
-		add_action( 'woocommerce_process_product_meta', array( $this, 'save_discord_product_data' ) );
+		add_action( 'woocommerce_process_product_meta', array( $this, 'save_discord_product_data' ), 10, 2 );
 		add_filter( 'manage_users_columns', array( $this, 'add_custom_user_columns' ) );
 		add_action( 'manage_users_custom_column', array( $this, 'populate_custom_user_columns' ), 10, 3 );
 		add_action( 'pre_user_query', array( $this, 'sort_custom_columns' ) );
-		add_action( 'wp_ajax_save_discord_actions', array( $this, 'save_discord_actions' )  );
-
 	}
 
 	/**
@@ -59,13 +57,13 @@ class Woo_Discord_Steam_Integration_Admin {
 	 * @return void
 	 */
 	public function enqueue_scripts( $hook ) {
-		$min = '.min';
-		$version = Woo_Discord_Steam_Integration()->get_plugin_version(); 
-		if( WP_DEBUG == true ){
+		$min     = '.min';
+		$version = Woo_Discord_Steam_Integration()->get_plugin_version();
+		if ( WP_DEBUG == true ) {
 			$version = time();
-			$min= '';
+			$min     = '';
 		}
-		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/admin.js', array( 'jquery' ),  $version);
+		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/admin.js', array( 'jquery' ), $version );
 		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/discord-action.js', array( 'jquery' ), $version );
 		$script_params = array(
 			'admin_ajax'                  => admin_url( 'admin-ajax.php' ),
@@ -231,42 +229,50 @@ class Woo_Discord_Steam_Integration_Admin {
 		global $post;
 		wp_enqueue_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-edit-product' );
 		wp_enqueue_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action' );
-		wc_get_template( 'product/discord-product-data-fields.php', array('product_id' => $post->ID), '',  Woo_Discord_Steam_Integration()->plugin_path() . '/templates/');
+		// echo 'hi';
+		wc_get_template( 'product/discord-product-data-fields.php', array( 'product_id' => $post->ID ), '', Woo_Discord_Steam_Integration()->plugin_path() . '/templates/' );
 	}
 
 	/**
 	 * Save the custom fields data when the product is saved.
 	 *
 	 * @param int $post_id The ID of the post (product) being saved.
-	 * 
+	 *
 	 * @deprecated to be removed. replaced by Discord Action Rules
 	 * @since 1.0.0
 	 */
-	public function save_discord_product_data( $post_id ) {
-		$discord_role_id = isset( $_POST['_ets_discord_role_id'] ) ? sanitize_text_field( $_POST['_ets_discord_role_id'] ) : '';
-		update_post_meta( $post_id, '_ets_discord_role_id', $discord_role_id );
-	}
+	public function save_discord_product_data( $post_id, $post ) {
 
-	public function save_discord_actions() {
-		
-		if (isset($_POST['product_id']) && isset($_POST['rules'])) {
-			
-			$product_id = intval($_POST['product_id']);
+		// error_log('Trigger data: ' . print_r($_POST['woo-discord-trigger'], true));
+		// error_log( 'Action data' . print_r( $_POST['woo-discord-action'], true ) );
+		// error_log( 'Server data' . print_r( $_POST['woo-discord-server'], true ) );
+		// error_log( 'Role data' . print_r( $_POST['woo-discord-role'], true ) );
 
-			delete_post_meta( $product_id, '_discord_action_rules' );
-			$rules = $_POST['rules'];
+		if ( isset( $_POST['woo-discord-trigger'] ) && is_array( $_POST['woo-discord-trigger'] ) ) {
 	
-			error_log('Received rules: ' . print_r($rules, true));
-	
-			update_post_meta($product_id, '_discord_action_rules', serialize($rules));
-	
-			wp_send_json_success(array('message' => 'Actions saved successfully!'));
+			$discord_rules = array();
+
+			foreach ( $_POST['woo-discord-trigger'] as $index => $trigger ) {
+				$action = isset( $_POST['woo-discord-action'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-action'][ $index ] ) : '';
+				$server = isset( $_POST['woo-discord-server'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-server'][ $index ] ) : '';
+				$role   = isset( $_POST['woo-discord-role'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-role'][ $index ] ) : '';
+
+				
+				$discord_rules[] = array(
+					'trigger' => sanitize_text_field( $trigger ),
+					'action'  => $action,
+					'server'  => $server,
+					'role'    => $role,
+				);
+			}
+
+			update_post_meta( $post_id, '_discord_action_rules', serialize( $discord_rules ) );
 		} else {
 		
-			wp_send_json_error(array('message' => 'Failed to save actions.'));
+			delete_post_meta( $post_id, '_discord_action_rules' );
 		}
 	}
-	
+
 
 
 	/**

@@ -1,166 +1,34 @@
-.woo-discord-steam-actions-container {
-    background-color: #1A1A1A;
-    color: #ffffff;
-    padding: 20px;
-    /* border-radius: 8px; */
-    margin-bottom: 20px;
+.woo-discord-steam-actions-container{
+    padding: 10px 20px 20px;
+    /* border: 1px solid #f00; */
 }
 
-.woo-discord-steam-header-container {
+.woo-discord-steam-header-container{
+    text-align: right;
+    border: 1px solid #c6c3c3;
     display: flex;
+    align-items: center;
+    padding: 10px;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    background-color: #262626;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    margin-inline: 0;
+    border-radius: 3px 3px 0 0;
+    background: #f6f6f6;
+    border-bottom: 0;
 }
-
-.woo-discord-steam-header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    background-color: #262626;
-    padding-top: 10px;
-    padding-bottom: 10px;
+.woo-discord-steam-header-container label{
+width: auto;
+padding-left: 162px;
+font-weight: 600;
+font-size: 16px;
 }
-
-.woo-discord-steam-header-title {
-    margin: 0;
-    font-size: 1.5em;
-    color: white;
-    flex: 1; /* Ensure the title takes up the left space */
+.woo-discord-steam-action{
+display: flex;
+flex-direction: column;
+gap: 15px;
+padding: 15px;
+border: 1px solid #c6c3c3;
 }
-
-.woo-discord-steam-header-buttons {
-    display: flex;
-    gap: 10px; /* Space between buttons */
+.woo-discord-steam-action .woo-discord-steam-action-row{
+display: flex;
+position: relative;
 }
-
-.add-action-btn, .add-action-btn-help {
-    background-color: #6CC1C2;
-    color: #000;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-.add-action-btn-help {
-    background-color: #fff; 
-    color: #000;
-}
-
-
-.woo-discord-steam-action {
-    background-color: #2a2a2a;
-    padding: 20px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    border: 1px solid #625858;
-}
-
-.action-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.dropdown-section {
-    margin-right: 15px;
-    flex: 1;
-}
-
-.trigger-dropdown, .action-dropdown, .server-dropdown, .role-dropdown {
-    background-color: #444;
-    color: white;
-    border: 1px solid #555;
-    padding: 8px;
-    border-radius: 4px;
-    width: 100%;
-    max-width: 300px;
-}
-
-.trigger-dropdown:focus, 
-.action-dropdown:focus, 
-.server-dropdown:focus, 
-.role-dropdown:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
-}
-
-.then-section {
-    margin-right: 15px;
-    font-weight: bold;
-    color: #ccc;
-}
-
-.remove-action-btn {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.role-section {
-    margin-top: 10px;
-    /* display: flex; */
-    align-items: center;
-}
-
-label.role-section-title {
-    margin:0px auto 0px;
-}
-select.role-dropdown{
-    float: none!important;
-}
-
-.woo-discord-steam-actions-container select.trigger-dropdown,
-.woo-discord-steam-actions-container select.action-dropdown,
-.woo-discord-steam-actions-container select.server-dropdown,
-.woo-discord-steam-actions-container select.role-dropdown {
-    background-color: #444;
-    color: white;
-    border: 1px solid #555;
-    border-radius: 5px;
-    padding: 8px;
-    width: 100%; 
-    
-}
-
-.woo-discord-steam-actions-container select:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
-}
-
-.woo-discord-steam-actions-container > div.submit{
-    float: none!important;
-}
-.submit-action-btn {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-.submit-action-btn:hover {
-    background-color: #218838;
-}
-
-
-
