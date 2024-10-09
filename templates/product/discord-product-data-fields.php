@@ -13,6 +13,7 @@
         $discord_action_rules = get_post_meta( $product_id, '_discord_action_rules', true );
         $discord_action_rules = ! empty( $discord_action_rules ) ? unserialize( $discord_action_rules ) : [];
 
+        error_log( print_r( $discord_action_rules, true));
         
         if ( empty( $discord_action_rules ) ) {
             $discord_action_rules[] = [

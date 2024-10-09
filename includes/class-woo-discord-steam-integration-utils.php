@@ -430,6 +430,9 @@ class Woo_Discord_Steam_Integration_Utils {
 	/**
 	 * Retrieve the Discord role ID associated with a product.
 	 *
+	 * @deprecated This method is deprecated in favor of get_discord_rules_by_product()
+	 * which supports multiple rules. This method will be removed in a future release.
+	 *
 	 * This method fetches the Discord role ID stored in the post meta for a given product ID.
 	 *
 	 * @param int $product_id The ID of the product.
@@ -439,6 +442,25 @@ class Woo_Discord_Steam_Integration_Utils {
 		$discord_role_id = get_post_meta( $product_id, '_ets_discord_role_id', true );
 		return $discord_role_id ? $discord_role_id : null;
 	}
+
+	/**
+	 * Retrieve the Discord action rules associated with a product.
+	 *
+	 * This method fetches the stored rules, which may include triggers, actions,
+	 * servers, and roles associated with a given product ID. The rules provide
+	 * a flexible way to map different Discord actions to product events.
+	 *
+	 * @param int $product_id The ID of the product.
+	 * @return array The array of Discord rules, or an empty array if no rules are found.
+	 */
+	public static function get_discord_rules_by_product( $product_id ) {
+		$discord_action_rules = get_post_meta( $product_id, '_discord_action_rules', true );
+        $discord_action_rules = ! empty( $discord_action_rules ) ? unserialize( $discord_action_rules ) : [];
+
+		return $discord_action_rules;
+
+	}
+
 
 	/**
 	 * Get the URL for the top-level menu icon.

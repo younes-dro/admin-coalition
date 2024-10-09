@@ -401,45 +401,6 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	}
 
 
-	/**
-	 * Add role to a Discord user.
-	 *
-	 * @param string $user_id The user ID.
-	 * @param string $role_id The role ID to be added.
-	 * @param int    $product_id The product ID.
-	 * @return bool True if successful, false otherwise.
-	 */
-	public function add_role_to_user( $user_id, $role_id, $product_id ) {
-		// error_log( "Call add role for user id : $user_id - disord role :  $role_id " );
-		$access_token                = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_access_token', true ) ) );
-		$guild_id                    = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
-		$_ets_discord_user_id        = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_user_id', true ) ) );
-		$discord_bot_token           = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
-		$discord_change_role_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id . '/roles/' . $role_id;
-
-		if ( $access_token && $_ets_discord_user_id ) {
-			// error_log( "Execute add role for user id : $user_id - disord role :  $role_id " );
-			$param = array(
-				'method'  => 'PUT',
-				'headers' => array(
-					'Content-Type'   => 'application/json',
-					'Authorization'  => 'Bot ' . $discord_bot_token,
-					'Content-Length' => 0,
-				),
-			);
-
-			$response = wp_remote_get( $discord_change_role_api_url, $param );
-			if ( ! is_wp_error( $response ) ) {
-				// error_log( print_r( 'Role Added ! '));
-			} else {
-				// error_log( print_r( $response, true ) );
-			}
-
-			/**
-			 * Error logs */
-		}
-	}
-
 
 	/**
 	 * Send a message to the Discord channel after payment is complete and role is assigned.
@@ -500,16 +461,98 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 
 
 
+	/**
+	 * Add role to a Discord user.
+	 *
+	 * @param string $user_id The user ID.
+	 * @param string $role_id The role ID to be added.
+	 * @param int    $server_id The guild ID.
+	 * 
+	 * @return bool True if successful, false otherwise.
+	 */
+	public function add_role_to_user( $user_id, $role_id, $server_id ) {
+		if ( $server_id ) {
+			$guild_id = $server_id;
+		} else{
+			$guild_id  = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		}
 
+		/********************* To remove  */
+		$guild_id  = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		$role_id = 1063277853728329738;
+		/*******************************  */
+
+		// error_log( "Call add role for user id : $user_id - disord role :  $role_id " );
+		$access_token                = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_access_token', true ) ) );
+		$_ets_discord_user_id        = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_user_id', true ) ) );
+		$discord_bot_token           = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
+		$discord_change_role_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id . '/roles/' . $role_id;
+
+		if ( $access_token && $_ets_discord_user_id ) {
+			// error_log( "Execute add role for user id : $user_id - disord role :  $role_id " );
+			$param = array(
+				'method'  => 'PUT',
+				'headers' => array(
+					'Content-Type'   => 'application/json',
+					'Authorization'  => 'Bot ' . $discord_bot_token,
+					'Content-Length' => 0,
+				),
+			);
+
+			$response = wp_remote_get( $discord_change_role_api_url, $param );
+			if ( ! is_wp_error( $response ) ) {
+				// error_log( print_r( 'Role Added ! '));
+			} else {
+				// error_log( print_r( $response, true ) );
+			}
+
+			/**
+			 * Error logs */
+		}
+	}
 
 	/**
 	 * Remove role from a Discord user.
 	 *
-	 * @param string $discord_user_id The Discord user ID.
+	 * @param string $user_id The user ID.
 	 * @param string $role_id The role ID to be removed.
+	 * @param int $server_id The Server ID.
+	 * 
 	 * @return bool True if successful, false otherwise.
 	 */
-	public function remove_role_from_user( $discord_user_id, $role_id ) {
+	public function remove_role_from_user( $user_id, $role_id, $server_id ) {
+		if ( $server_id ) {
+			$guild_id = $server_id;
+		} else{
+			$guild_id  = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		}
+		/********************* To remove  */
+		$guild_id  = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		$role_id = 1063277853728329738;
+		/*******************************  */
+
+		$access_token                = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_access_token', true ) ) );
+		$_ets_discord_user_id        = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_user_id', true ) ) );
+		$discord_bot_token           = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
+		$discord_delete_role_api_url            = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id . '/roles/' . $role_id;
+		if ( $access_token && $_ets_discord_user_id ) {
+			$param = array(
+				'method'  => 'DELETE',
+				'headers' => array(
+					'Content-Type'   => 'application/json',
+					'Authorization'  => 'Bot ' . $discord_bot_token,
+					'Content-Length' => 0,
+				),
+			);
+
+			$response = wp_remote_request( $discord_delete_role_api_url, $param );
+			if ( ! is_wp_error( $response ) ) {
+				error_log( print_r( 'Role Removed ! '));
+			} else {
+				error_log( print_r( $response, true ) );
+			}
+			
+		}
 	}
 
 	/**

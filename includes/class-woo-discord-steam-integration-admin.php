@@ -229,7 +229,6 @@ class Woo_Discord_Steam_Integration_Admin {
 		global $post;
 		wp_enqueue_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-edit-product' );
 		wp_enqueue_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action' );
-		// echo 'hi';
 		wc_get_template( 'product/discord-product-data-fields.php', array( 'product_id' => $post->ID ), '', Woo_Discord_Steam_Integration()->plugin_path() . '/templates/' );
 	}
 

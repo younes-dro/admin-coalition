@@ -267,6 +267,8 @@ class Woo_Discord_Steam_Integration {
 	}
 }
 
+require_once plugin_dir_path( __FILE__ ) . 'wp-cli/get-discord-rules-command.php';
+
 /**
  * Returns the main instance of Woo_Discord_Steam_Integration.
  */

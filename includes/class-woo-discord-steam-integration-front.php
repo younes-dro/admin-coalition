@@ -35,6 +35,7 @@ class Woo_Discord_Steam_Integration_Front {
 		// add_filter( 'woocommerce_order_button_html', array( $this, 'custom_place_order_button_html' ) );
 		// add_filter( 'woocommerce_before_checkout_form', array( $this, 'add_connect_discord_button_billing_form' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'handle_successful_purchase' ) );
+		add_action( 'woocommerce_order_status_refunded', array( $this, 'handle_refunded_order' ) );
 		add_action( 'init', array( $this, 'init_shortcodes' ) );
 		add_action( 'init', array( $this, 'handle_steam_openid_callback' ) );
 		// add_action( 'woocommerce_payment_complete', array( $this, 'handle_successful_purchase' ) );
@@ -437,11 +438,6 @@ class Woo_Discord_Steam_Integration_Front {
 		}
 	}
 
-
-
-
-
-
 	/**
 	 * Handle actions after a successful WooCommerce order completion.
 	 *
@@ -461,23 +457,68 @@ class Woo_Discord_Steam_Integration_Front {
 
 		foreach ( $order->get_items() as $item_id => $item ) {
 			$product_id      = $item->get_product_id();
-			$discord_role_id = Woo_Discord_Steam_Integration_Utils::get_discord_role_id_by_product( $product_id );
+			
+			$discord_rules = Woo_Discord_Steam_Integration_Utils::get_discord_rules_by_product( $product_id );
+			if( empty( $discord_rules ) ){
+				continue;
+			}
 
-			// error_log( "Product ID: $product_id - Discord Role ID: $discord_role_id" );
+			foreach ( $discord_rules as $rule ) {
+				$trigger = $rule['trigger'];
+				$action = $rule['action'];
+				$server_id = $rule['server'];
+				$role_id = $rule['role'];
 
-			if ( ! empty( $discord_role_id ) ) {
-				$discord_user_id = Woo_Discord_Steam_Integration_Utils::get_discord_user_id( $user_id );
-
-				if ( $discord_user_id ) {
-					$this->discord_handler->add_role_to_user( $user_id, $discord_role_id, $product_id );
-				} else {
-					// error_log( "Discord user ID is missing for user ID: $user_id" );
+				if( ! empty( $role_id ) ){
+					if ( 'purchased' === $trigger && 'assign_role' === $action ) {
+						$this->discord_handler->add_role_to_user( $user_id, $role_id, $server_id );
+					} 
 				}
+				
 			}
 		}
 	}
 
+	/**
+	 * Handle action order fully refunded
+	 *
+	 * @param int $order_id The ID of the completed order.
+	 */
+	public function handle_refunded_order( $order_id ) {
+		// //error_log( print_r( get_class_methods( $this->discord_handler ), true ) );
+		$order   = wc_get_order( $order_id );
+		$user_id = $order->get_customer_id();
 
+		// error_log( "Order Completed ID: $order_id - User ID: $user_id" );
+
+		if ( ! $user_id ) {
+			// error_log( "User ID is missing for order ID: $order_id" );
+			return;
+		}
+
+		foreach ( $order->get_items() as $item_id => $item ) {
+			$product_id      = $item->get_product_id();
+			
+			$discord_rules = Woo_Discord_Steam_Integration_Utils::get_discord_rules_by_product( $product_id );
+			if( empty( $discord_rules ) ){
+				continue;
+			}
+
+			foreach ( $discord_rules as $rule ) {
+				$trigger = $rule['trigger'];
+				$action = $rule['action'];
+				$server_id = $rule['server'];
+				$role_id = $rule['role'];
+
+				if( ! empty( $role_id ) ){
+					if ( 'refund' === $trigger && 'remove_role' === $action ) {
+						$this->discord_handler->remove_role_from_user( $user_id, $role_id, $server_id );
+					}
+				}
+				
+			}
+		}
+	}
 
 	/**
 	 * Log purchase message after order is placed.
