@@ -448,17 +448,18 @@ class Woo_Discord_Steam_Integration_Front {
 		$order   = wc_get_order( $order_id );
 		$user_id = $order->get_customer_id();
 
-		// error_log( "Order Completed ID: $order_id - User ID: $user_id" );
+		error_log( "Order Completed ID: $order_id - User ID: $user_id" );
 
 		if ( ! $user_id ) {
-			// error_log( "User ID is missing for order ID: $order_id" );
+			error_log( "User ID is missing for order ID: $order_id" );
 			return;
 		}
 
 		foreach ( $order->get_items() as $item_id => $item ) {
 			$product_id      = $item->get_product_id();
-			
+			error_log( "Order Completed  Product ID : " . print_r( $product_id, true ) );
 			$discord_rules = Woo_Discord_Steam_Integration_Utils::get_discord_rules_by_product( $product_id );
+			error_log( "Order Completed  Rules : " . print_r( $discord_rules, true ) );
 			if( empty( $discord_rules ) ){
 				continue;
 			}
@@ -489,17 +490,18 @@ class Woo_Discord_Steam_Integration_Front {
 		$order   = wc_get_order( $order_id );
 		$user_id = $order->get_customer_id();
 
-		// error_log( "Order Completed ID: $order_id - User ID: $user_id" );
+		error_log( "Order Refunded ID: $order_id - User ID: $user_id" );
 
 		if ( ! $user_id ) {
-			// error_log( "User ID is missing for order ID: $order_id" );
+			error_log( "User ID is missing for order ID: $order_id" );
 			return;
 		}
 
 		foreach ( $order->get_items() as $item_id => $item ) {
 			$product_id      = $item->get_product_id();
-			
+			error_log( "Order Refunded Product ID : " . print_r( $product_id, true ) );
 			$discord_rules = Woo_Discord_Steam_Integration_Utils::get_discord_rules_by_product( $product_id );
+			error_log( "Order Completed Rules : " . print_r( $discord_rules, true ) );
 			if( empty( $discord_rules ) ){
 				continue;
 			}

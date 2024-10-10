@@ -3,8 +3,6 @@
 $discord_action_rules = get_post_meta( $product_id, '_discord_action_rules', true );
 $discord_action_rules = ! empty( $discord_action_rules ) ? unserialize( $discord_action_rules ) : array();
 
-// error_log( print_r( $discord_action_rules, true));
-
 if ( empty( $discord_action_rules ) ) {
 	$discord_action_rules[] = array(
 		'trigger' => '',
@@ -13,13 +11,12 @@ if ( empty( $discord_action_rules ) ) {
 		'role'    => '',
 	);
 }
+
 $server_1 = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
 $server_2 = sanitize_text_field( trim( get_option( 'discord_server_id_2' ) ) );
 
 $server_1_roles = maybe_unserialize( get_option( 'discord_all_roles_' . $server_1 ) );
 $server_2_roles = maybe_unserialize( get_option( 'discord_all_roles_' . $server_2 ) );
-
-// error_log( print_r( $server_2_roles, true ) );
 
 ?>
 <div id="discord_product_data" class="panel woocommerce_options_panel hidden">
@@ -65,26 +62,53 @@ $server_2_roles = maybe_unserialize( get_option( 'discord_all_roles_' . $server_
 					</div>
 
 					<div class="role-section">
-
-						<select class="role-dropdown" name="woo-discord-role[]">
-						<?php foreach ( $server_1_roles as $role_id => $role_name ) : ?>
-							<option value="<?php echo esc_attr( $role_id ); ?>"><?php echo esc_html( $role_name ); ?></option>
-						<?php endforeach; ?>
+						<select class="role-dropdown server-1-roles" name="woo-discord-role[]" <?php echo $rule['server'] == $server_1 ? '' : 'disabled style="display:none;"'; ?>>
+							<?php foreach ( $server_1_roles as $role_id => $role_name ) : ?>
+								<option value="<?php echo esc_attr( $role_id ); ?>" <?php selected( $rule['role'], $role_id ); ?>>
+									<?php echo esc_html( $role_name ); ?>
+								</option>
+							<?php endforeach; ?>
 						</select>
-						<select class="role-dropdown" name="woo-discord-role[]">
-						<?php foreach ( $server_2_roles as $role_id => $role_name ) : ?>
-							<option value="<?php echo esc_attr( $role_id ); ?>"><?php echo esc_html( $role_name ); ?></option>
-						<?php endforeach; ?>
-						</select>                        
-
+						<select class="role-dropdown server-2-roles" name="woo-discord-role[]" <?php echo $rule['server'] == $server_2 ? '' : 'disabled style="display:none;"'; ?>>
+							<?php foreach ( $server_2_roles as $role_id => $role_name ) : ?>
+								<option value="<?php echo esc_attr( $role_id ); ?>" <?php selected( $rule['role'], $role_id ); ?>>
+									<?php echo esc_html( $role_name ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
 					</div>
+
 					<div class="woo-discord-steaam-remove-wrap">
 						<span class="woo-discord-steam-remove-action-row">X</span>
-
 					</div>
 				</div><!-- .woo-discord-steam-action-row-wrap -->
-			
-		<?php } ?>
+			<?php
+		}
+		?>
 		</div> 
 	</div><!-- .woo-discord-steam-actions-container -->
 </div><!-- .woocommerce_options_panel -->
+
+<script>
+	jQuery(document).ready(function($) {
+		function toggleRoleDropdown(serverDropdown) {
+			var selectedServer = $(serverDropdown).val();
+			var roleSection = $(serverDropdown).closest('.woo-discord-steam-action-row-wrap').find('.role-section');
+
+			roleSection.find('.role-dropdown').prop('disabled', true).hide();
+			if (selectedServer === '<?php echo esc_js( $server_1 ); ?>') {
+				roleSection.find('.server-1-roles').prop('disabled', false).show();
+			} else if (selectedServer === '<?php echo esc_js( $server_2 ); ?>') {
+				roleSection.find('.server-2-roles').prop('disabled', false).show();
+			}
+		}
+
+		$('.server-dropdown').each(function() {
+			toggleRoleDropdown(this);
+		});
+
+		$(document).on('change', '.server-dropdown', function() {
+			toggleRoleDropdown(this);
+		});
+	});
+</script>
