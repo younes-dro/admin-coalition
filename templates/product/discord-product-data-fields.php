@@ -9,7 +9,9 @@
         </div>
 
         <?php
-    
+
+use Automattic\Jetpack\VideoPress\Divi;
+
         $discord_action_rules = get_post_meta( $product_id, '_discord_action_rules', true );
         $discord_action_rules = ! empty( $discord_action_rules ) ? unserialize( $discord_action_rules ) : [];
 
@@ -23,11 +25,11 @@
                 'role'    => '',
             ];
         }
-
-        
-        foreach ( $discord_action_rules as $index => $rule ) {
         ?>
-            <div class="woo-discord-steam-action" data-rule-id="<?php echo esc_attr( $index + 1 ); ?>">
+        <div class="woo-discord-steam-action">
+       <?php 
+       foreach ( $discord_action_rules as $index => $rule ) {
+        ?>
                 <div class="woo-discord-steam-action-row-wrap">
                     <div class="woo-discord-steam-action-row">
                         <div class="dropdown-section">
@@ -41,20 +43,12 @@
                             </select>
                         </div>
 
-                        <div class="then-section">
-                            <span>Then</span>
-                        </div>
-
                         <div class="dropdown-section">
                             <select class="action-dropdown" name="woo-discord-action[]">
                                 <option value="assign_role" <?php selected( $rule['action'], 'assign_role' ); ?>>Assign role to customer on server</option>
                                 <option value="remove_role" <?php selected( $rule['action'], 'remove_role' ); ?>>Remove role from customer on server</option>
                                 <option value="send_message" <?php selected( $rule['action'], 'send_message' ); ?>>Send message on server</option>
                             </select>
-                        </div>
-
-                        <div class="then-section">
-                            <span>On</span>
                         </div>
 
                         <div class="dropdown-section">
@@ -66,15 +60,18 @@
                     </div>
 
                     <div class="role-section">
-                        <label class="role-section-title">Role:</label>
                         <select class="role-dropdown" name="woo-discord-role[]">
                             <option value="rust_ensign" <?php selected( $rule['role'], 'rust_ensign' ); ?>>RUST Ensign</option>
                             <option value="rust_commander" <?php selected( $rule['role'], 'rust_commander' ); ?>>RUST Commander</option>
                         </select>
                     </div>
-                </div>
-            </div>
-        <?php } ?>
+                    <div class="woo-discord-steaam-remove-wrap">
+                        <span class="woo-discord-steam-remove-action-row">X</span>
 
+                    </div>
+                </div><!-- .woo-discord-steam-action-row-wrap -->
+            
+        <?php } ?>
+        </div> 
     </div><!-- .woo-discord-steam-actions-container -->
 </div><!-- .woocommerce_options_panel -->

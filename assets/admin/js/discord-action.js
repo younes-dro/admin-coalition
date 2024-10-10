@@ -10,9 +10,9 @@
     });
 
     
-    $(document).on('click', '.remove-action-btn', function(e) {
+    $(document).on('click', '.woo-discord-steaam-remove-wrap', function(e) {
         e.preventDefault();
-        $(this).closest('div.woo-discord-steam-action').remove();
+        $(this).closest('div.woo-discord-steam-action-row-wrap').remove();
     });
     
     
