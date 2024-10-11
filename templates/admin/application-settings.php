@@ -11,7 +11,7 @@ $discord_bot_token         = sanitize_text_field( trim( get_option( 'discord_bot
 $discord_bot_redirect_url  = Woo_Discord_Steam_Integration_Utils::get_bot_redirect_url();
 $discord_auth_redirect_url = wc_get_checkout_url() . '?via=discord';
 $discord_purchase_channel  = sanitize_text_field( trim( get_option( 'discord_purchase_channel' ) ) );
-$discord_channels          = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels( $discord_server_id );
+// $discord_channels          = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels( $discord_server_id );
 
 // Retrieve options for the second server
 $discord_server_id_2 = sanitize_text_field( trim( get_option( 'discord_server_id_2' ) ) );
@@ -92,16 +92,7 @@ $steam_web_api_key = sanitize_text_field( trim( get_option( 'steam_web_api_key' 
 			<th scope="row"><label for="discord_bot_token"><?php esc_html_e( 'Discord Bot Token', 'admin-coalition' ); ?></label></th>
 			<td><input type="password" id="discord_bot_token" name="discord_bot_token" value="<?php echo esc_attr( $discord_bot_token ); ?>" class="regular-text"></td>
 		</tr>
-		<tr>
-			<th scope="row"><label for="discord_purchase_channel"><?php esc_html_e( 'Discord Purchase Channel', 'admin-coalition' ); ?></label></th>
-			<td>
-				<select id="discord_purchase_channel" name="discord_purchase_channel" class="regular-text">
-					<?php foreach ( $discord_channels as $channel_id => $channel_name ) : ?>
-						<option value="<?php echo esc_attr( $channel_id ); ?>" <?php selected( $discord_purchase_channel, $channel_id ); ?>><?php echo esc_html( $channel_name ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</td>
-		</tr>
+
 	</table>
 
 	<!-- Display Bot Status for First Server -->

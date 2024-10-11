@@ -124,7 +124,7 @@ class Woo_Discord_Steam_Integration_Admin {
 			delete_option( 'discord_bot_token' );
 			delete_option( 'discord_bot_redirect_url' );
 			delete_option( 'discord_auth_redirect_url' );
-			delete_option( 'discord_purchase_channel' );
+			// delete_option( 'discord_purchase_channel' );
 			delete_option( 'steam_web_api_key' );
 			delete_option( 'discord_all_roles' );
 			delete_option( 'discord_roles_color' );
@@ -160,9 +160,9 @@ class Woo_Discord_Steam_Integration_Admin {
 		if ( isset( $_POST['discord_auth_redirect_url'] ) ) {
 			update_option( 'discord_auth_redirect_url', sanitize_text_field( $_POST['discord_auth_redirect_url'] ) );
 		}
-		if ( isset( $_POST['discord_purchase_channel'] ) ) {
-			update_option( 'discord_purchase_channel', sanitize_text_field( $_POST['discord_purchase_channel'] ) );
-		}
+		// if ( isset( $_POST['discord_purchase_channel'] ) ) {
+		// 	update_option( 'discord_purchase_channel', sanitize_text_field( $_POST['discord_purchase_channel'] ) );
+		// }
 		if ( isset( $_POST['discord_saved_server'] ) ) {
 			update_option( 'discord_saved_server', sanitize_text_field( $_POST['discord_saved_server'] ) );
 		}
@@ -237,7 +237,6 @@ class Woo_Discord_Steam_Integration_Admin {
 	 *
 	 * @param int $post_id The ID of the post (product) being saved.
 	 *
-	 * @deprecated to be removed. replaced by Discord Action Rules
 	 * @since 1.0.0
 	 */
 	public function save_discord_product_data( $post_id, $post ) {
@@ -255,6 +254,8 @@ class Woo_Discord_Steam_Integration_Admin {
 				$action = isset( $_POST['woo-discord-action'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-action'][ $index ] ) : '';
 				$server = isset( $_POST['woo-discord-server'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-server'][ $index ] ) : '';
 				$role   = isset( $_POST['woo-discord-role'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-role'][ $index ] ) : '';
+				$channel   = isset( $_POST['woo-discord-channel'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-channel'][ $index ] ) : '';
+				$message   = isset( $_POST['woo-discord-message'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-message'][ $index ] ) : '';
 
 				
 				$discord_rules[] = array(
@@ -262,6 +263,8 @@ class Woo_Discord_Steam_Integration_Admin {
 					'action'  => $action,
 					'server'  => $server,
 					'role'    => $role,
+					'channel' => $channel,
+					'message' => $message,
 				);
 			}
 

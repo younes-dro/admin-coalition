@@ -40,7 +40,7 @@ class Woo_Discord_Steam_Integration_Front {
 		add_action( 'init', array( $this, 'handle_steam_openid_callback' ) );
 		// add_action( 'woocommerce_payment_complete', array( $this, 'handle_successful_purchase' ) );
 		// add_action( 'woocommerce_payment_complete_order_status_completed', array( $this, 'handle_successful_purchase' ) );
-		add_action( 'woocommerce_checkout_order_processed', array( $this, 'log_purchase_message' ), 10, 3 );
+		// add_action( 'woocommerce_checkout_order_processed', array( $this, 'log_purchase_message' ), 10, 3 );
 		add_action( 'woocommerce_checkout_process', array( $this, 'validate_connect_buttons' ), 99 );
 		add_action( 'woocommerce_before_checkout_process', array( $this, 'validate_connect_buttons' ), 20 );
 		add_action( 'woocommerce_after_checkout_validation', array( $this, 'custom_validate_connect_buttons' ), 10, 99 );
@@ -463,6 +463,8 @@ class Woo_Discord_Steam_Integration_Front {
 			if( empty( $discord_rules ) ){
 				continue;
 			}
+			
+			error_log('Rules for product id : ' . $product_id . ' : ' .pirnt_r( $discord_rules, true) );
 
 			foreach ( $discord_rules as $rule ) {
 				$trigger = $rule['trigger'];
@@ -473,6 +475,9 @@ class Woo_Discord_Steam_Integration_Front {
 				if( ! empty( $role_id ) ){
 					if ( 'purchased' === $trigger && 'assign_role' === $action ) {
 						$this->discord_handler->add_role_to_user( $user_id, $role_id, $server_id );
+					}
+					if( 'purchased' === $trigger && 'send_message' === $action ) {
+						// $this->discord_handler->send_message( $user_id, $role_id, $server_id, $channel_id );
 					} 
 				}
 				
@@ -525,6 +530,11 @@ class Woo_Discord_Steam_Integration_Front {
 	/**
 	 * Log purchase message after order is placed.
 	 *
+	* @deprecated since version 1.1.0, replaced by action rules.
+	* No longer needed as sending messages can now be handled through the new action rules,
+	* including the "send message" option. This eliminates the need to send messages via the 
+	* completed payment action hook.
+
 	 * @param int      $order_id    The order ID.
 	 * @param array    $posted_data The array of posted data.
 	 * @param WC_Order $order       The order object.
@@ -535,7 +545,7 @@ class Woo_Discord_Steam_Integration_Front {
 
 		foreach ( $product_ids as $item_id => $item ) {
 			$product_id = $item->get_product_id();
-			do_action( 'ets_discord_send_dm_after_payment_complete', $user_id, $product_id );
+			// do_action( 'ets_discord_send_dm_after_payment_complete', $user_id, $product_id );
 		}
 	}
 

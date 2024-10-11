@@ -253,7 +253,7 @@ class Woo_Discord_Steam_Integration_Utils {
 		}
 
 		asort( $channel_options );
-		$channel_options = array( 0 => '---' ) + $channel_options;
+		// $channel_options = array( 0 => '---' ) + $channel_options;
 
 		return $channel_options;
 	}

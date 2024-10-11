@@ -22,7 +22,7 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	public function __construct() {
 		add_action( 'init', array( $this, 'init_discord_auth' ) );
 		add_action( 'init', array( $this, 'handle_discord_auth_response' ) );
-		add_action( 'ets_discord_send_dm_after_payment_complete', array( $this, 'send_message_to_channel_after_payment_complete' ), 10, 2 );
+		// add_action( 'ets_discord_send_dm_after_payment_complete', array( $this, 'send_message_to_channel_after_payment_complete' ), 10, 2 );
 	}
 
 	/**
@@ -405,6 +405,10 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	/**
 	 * Send a message to the Discord channel after payment is complete and role is assigned.
 	 *
+	* @deprecated since version 1.1.0, replaced by action rules.
+	* No longer needed as sending messages can now be handled through the new action rules,
+	* including the "send message" option. This eliminates the need to send messages via the 
+	* completed payment action hook.
 	 * @param int $user_id The user ID.
 	 * @param int $product_id The product ID.
 	 */
