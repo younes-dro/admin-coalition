@@ -58,21 +58,68 @@ class Woo_Discord_Steam_Integration_Utils {
 		return $bot_redirect_url;
 	}
 
+	/**
+	 * Public method to check the status of a single server
+	 * This method is used to access the private check_single_server_status.
+	 *
+	 * @param string $guild_id
+	 * @param string $discord_bot_token
+	 * @param string $client_id
+	 * @param string $server_label
+	 * @return string
+	 */
+	public static function get_single_server_status( $guild_id, $discord_bot_token, $client_id, $server_label ) {
+		// error_log("Checking server status with params: guild_id={$guild_id}, bot_token={$discord_bot_token}, client_id={$client_id}, server_label={$server_label}");
+		return self::check_single_server_status( $guild_id, $discord_bot_token, $client_id, $server_label );
+	}
+
 
 
 	/**
 	 * Check the bot status connection.
 	 *
 	 * @since 1.0.0
+	 * @deprecated 1.1.0 This method is deprecated and replaced by a new approach to handle multiple servers.
+	 * The current system handles both the first and second servers via separate options.
+	 * Please use the server-specific connection checks to handle individual server connections.
 	 *
 	 * @return string HTML output indicating the status of the bot connection.
 	 */
 	public static function check_bot_status_connection() {
 		$guild_id          = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		$second_guild_id   = sanitize_text_field( trim( get_option( 'second_discord_server_id' ) ) );
 		$discord_bot_token = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
 		$client_id         = sanitize_text_field( trim( get_option( 'discord_client_id' ) ) );
 		$user_id           = get_current_user_id();
 
+		$bot_status_output = '';
+
+		// Check the first server status
+		$bot_status_output .= self::check_single_server_status( $guild_id, $discord_bot_token, $client_id, 'First Server' );
+
+		// Check the second server status if it exists
+		if ( $second_guild_id ) {
+			$bot_status_output .= self::check_single_server_status( $second_guild_id, $discord_bot_token, $client_id, 'Second Server' );
+		}
+
+		return $bot_status_output;
+	}
+
+	/**
+	 * Checks the status of a bot connection to a specific Discord server and retrieves its roles.
+	 *
+	 * This function performs an API call to Discord to check whether the bot is connected to a specific server (guild)
+	 * and retrieves the list of roles for that server. It also handles various error conditions, such as incorrect
+	 * server ID or bot token, and provides feedback to the admin via a button to reconnect the bot if necessary.
+	 *
+	 * @param string $guild_id The Discord server ID (guild ID) to check the connection for.
+	 * @param string $discord_bot_token The Discord bot token used for authorization.
+	 * @param string $client_id The Discord client ID (application ID) of the bot.
+	 * @param string $server_label The label to identify the server (e.g., "First Server" or "Second Server").
+	 *
+	 * @return string The HTML output for the connection status, including buttons for reconnecting the bot if needed.
+	 */
+	private static function check_single_server_status( $guild_id, $discord_bot_token, $client_id, $server_label ) {
 		if ( $guild_id && $discord_bot_token ) {
 			$discord_server_roles_api = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/roles';
 			$guild_args               = array(
@@ -83,37 +130,31 @@ class Woo_Discord_Steam_Integration_Utils {
 				),
 			);
 			$guild_response           = wp_remote_post( $discord_server_roles_api, $guild_args );
-			// self::discord_log_api_response( $user_id, $discord_server_roles_api, $guild_args, $guild_response );
-			$response_arr = json_decode( wp_remote_retrieve_body( $guild_response ), true );
+			$response_arr             = json_decode( wp_remote_retrieve_body( $guild_response ), true );
 
 			$bot_button = '';
 
+			// Check for API errors and handle them accordingly
 			if ( array_key_exists( 'code', $response_arr ) || array_key_exists( 'error', $response_arr ) ) {
-
-				// //error_log( print_r( 'Bot error code : ' . $response_arr['code'], true ) );
-
-				delete_option( 'discord_all_roles' );
-
+				// Handle specific error codes
 				if ( $response_arr['code'] === 10004 ) {
-					$bot_button .= '<a href="?action=woo-discord-steam-connect-to-bot" class="button-primary woo-discord-steam-error woo-discord-steam-connect-to-bot" id="woo-discord-steam-connect-discord-bot">' . esc_html__( 'Connect your Bot', 'admin-coalition' ) . self::get_discord_logo_white() . '</a>';
-					$bot_button .= '<b>The server ID is wrong or you did not connect the Bot.</b>';
+					$server_number = ( $server_label === 'First Server' ) ? 1 : 2;
+					// Server ID is wrong or the bot is not connected to the server
+					$bot_button .= '<a href="?action=woo-discord-steam-connect-to-bot&server_number=' . $server_number . '" class="button-primary woo-discord-steam-error woo-discord-steam-connect-to-bot" id="woo-discord-steam-connect-discord-bot">' . esc_html__( 'Connect your Bot to ' . $server_label, 'admin-coalition' ) . self::get_discord_logo_white() . '</a>';
+					$bot_button .= '<b>The server ID is wrong or you did not connect the Bot to ' . $server_label . '.</b>';
 					return $bot_button;
-
 				} elseif ( $response_arr['code'] === 0 && $response_arr['message'] == '401: Unauthorized' ) {
-					$bot_button .= '<a href="#" class="button-primary woo-discord-steam-error">' . esc_html__( 'Error: Unauthorized - The Bot Token is wrong', 'admin-coalition' ) . '</a>';
-					return $bot_button;
-
-				} elseif ( $response_arr['code'] === 50035 ) {
-					$bot_button .= '<a href="#" class="button-primary woo-discord-steam-error">' . esc_html__( 'The server ID provided may be malformed or incorrect', 'admin-coalition' ) . '</a>';
+					// Bot token is unauthorized or incorrect
+					$bot_button .= '<a href="#" class="button-primary woo-discord-steam-error">' . esc_html__( 'Error: Unauthorized - The Bot Token is wrong for ' . $server_label, 'admin-coalition' ) . '</a>';
 					return $bot_button;
 				} else {
 					return 'Unknown Error!';
 				}
 			} else {
-				$bot_button .= '<div class="woo-discord-steam-bot-connected"><a href="#" class="button-primary woo-discord-steam-valid"><span>' . esc_html__( 'Bot connected', 'admin-coalition' ) . '</span>' . self::get_discord_logo_white() . '</a></div>';
+				// Bot is connected successfully, show a success message
+				$bot_button .= '<div class="woo-discord-steam-bot-connected"><a href="#" class="button-primary woo-discord-steam-valid"><span>' . esc_html__( 'Bot connected to ' . $server_label, 'admin-coalition' ) . '</span>' . self::get_discord_logo_white() . '</a></div>';
 
-
-				// Take the opportunity and save the roles.
+				// Save the roles for this server
 				$discord_roles = array();
 				foreach ( $response_arr as $key => $value ) {
 					$isbot = false;
@@ -128,20 +169,20 @@ class Woo_Discord_Steam_Integration_Utils {
 						}
 					}
 					if ( $key != 'previous_mapping' && $isbot == false && isset( $value['name'] ) && $value['name'] != '@everyone' ) {
-						$discord_roles[ $value['id'] ]       = $value['name'];
-						$discord_roles_color[ $value['id'] ] = $value['color'];
+						$discord_roles[ $value['id'] ] = $value['name'];
 					}
 				}
-				// //error_log( print_r( $discord_roles, true ) );
-				update_option( 'discord_all_roles', serialize( $discord_roles ) );
-				update_option( 'discord_roles_color', serialize( $discord_roles_color ) );
 
+				// Save roles for each server separately
+				update_option( 'discord_all_roles_' . $guild_id, serialize( $discord_roles ) );
+
+				// error_log( print_r( $bot_button, true ) );
 				return $bot_button;
 			}
-		} else {
-			// return '<div class="woo-discord-steam-warning"><p class="description">Fill The Form</p></div>';
 		}
 	}
+
+
 
 	/**
 	 * Get the Discord logo in white.
@@ -155,13 +196,24 @@ class Woo_Discord_Steam_Integration_Utils {
 	}
 
 	/**
-	 * Get Discord channels
+	 * Fetch Discord channels based on a dynamic server ID.
 	 *
-	 * @return array List of Channels
+	 * This function retrieves the list of text channels from a specified Discord server (guild)
+	 * using the provided server ID. The server must be authenticated via the bot token, and the
+	 * function returns an associative array of channel IDs and names, sorted alphabetically.
+	 *
+	 * @param string $discord_server_id The Discord server (guild) ID from which to fetch channels.
+	 *
+	 * @return array An associative array of channels where the key is the channel ID and the value
+	 *               is the channel name. Returns an empty array if the bot token or server ID
+	 *               is invalid, or if an error occurs during the API request.
 	 */
-	public static function fetch_discord_channels() {
-		$discord_bot_token = sanitize_text_field( get_option( 'discord_bot_token' ) );
-		$discord_server_id = sanitize_text_field( get_option( 'discord_server_id' ) );
+	public static function fetch_discord_channels( $discord_server_id ) {
+		if ( empty( $discord_server_id ) ) {
+			return array();
+		}
+
+		$discord_bot_token = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
 		$discord_api_url   = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL;
 
 		if ( empty( $discord_bot_token ) || empty( $discord_server_id ) ) {
@@ -188,23 +240,24 @@ class Woo_Discord_Steam_Integration_Utils {
 		}
 
 		if ( key_exists( 'code', $channels ) ) {
-			//error_log( print_r( $channels, true ) );
+			// error_log( print_r( $channels, true ) );
 			return array();
-
 		}
 
 		$channel_options = array();
 		foreach ( $channels as $channel ) {
+			// Only return text channels (type 0)
 			if ( $channel['type'] == 0 ) {
 				$channel_options[ $channel['id'] ] = $channel['name'];
 			}
 		}
+
 		asort( $channel_options );
-		$channel_options = array( 0 => '---' ) + $channel_options;
-		// //error_log( print_r( $channel_options, true ) );
-		
+		// $channel_options = array( 0 => '---' ) + $channel_options;
+
 		return $channel_options;
 	}
+
 
 	/**
 	 * Generate Discord login URL.
@@ -213,7 +266,7 @@ class Woo_Discord_Steam_Integration_Utils {
 	 */
 	public static function get_discord_login_url() {
 		// $redirect_uri = wc_get_checkout_url();
-		$redirect_uri = get_option( 'discord_auth_redirect_url');
+		$redirect_uri = get_option( 'discord_auth_redirect_url' );
 		$params       = array(
 			'client_id'     => sanitize_text_field( get_option( 'discord_client_id' ) ),
 			'redirect_uri'  => $redirect_uri,
@@ -230,23 +283,25 @@ class Woo_Discord_Steam_Integration_Utils {
 	 *
 	 * @return string The URL to redirect to Steam's login page.
 	 */
-	public static function get_steam_login_url($redirect_url = '') {
-		$return_url = !empty( $redirect_url ) ? $redirect_url : wc_get_checkout_url(); // Redirect URI after authentication
-		//error_log( 'Redirect URL in Get Steam login url :' . $return_url );
-		$steam_login_url = "https://steamcommunity.com/openid/login?" . http_build_query(array(
-			'openid.mode' => 'checkid_setup',
-			'openid.ns' => 'http://specs.openid.net/auth/2.0',
-			'openid.return_to' => $return_url,
-			'openid.realm' => home_url(),
-			'openid.ns.sreg' => 'http://openid.net/extensions/sreg/1.1',
-			'openid.claimed_id' => 'http://specs.openid.net/auth/2.0/identifier_select',
-			'openid.identity' => 'http://specs.openid.net/auth/2.0/identifier_select',
-		));
-	
+	public static function get_steam_login_url( $redirect_url = '' ) {
+		$return_url = ! empty( $redirect_url ) ? $redirect_url : wc_get_checkout_url(); // Redirect URI after authentication
+		// error_log( 'Redirect URL in Get Steam login url :' . $return_url );
+		$steam_login_url = 'https://steamcommunity.com/openid/login?' . http_build_query(
+			array(
+				'openid.mode'       => 'checkid_setup',
+				'openid.ns'         => 'http://specs.openid.net/auth/2.0',
+				'openid.return_to'  => $return_url,
+				'openid.realm'      => home_url(),
+				'openid.ns.sreg'    => 'http://openid.net/extensions/sreg/1.1',
+				'openid.claimed_id' => 'http://specs.openid.net/auth/2.0/identifier_select',
+				'openid.identity'   => 'http://specs.openid.net/auth/2.0/identifier_select',
+			)
+		);
+
 		return $steam_login_url;
 	}
-	
-	
+
+
 
 
 	/**
@@ -314,14 +369,14 @@ class Woo_Discord_Steam_Integration_Utils {
 		$steam_avatar = get_user_meta( $user_id, '_ets_steam_avatar', true );
 		return $steam_avatar ? $steam_avatar : null;
 	}
-	
+
 	/**
 	 * Fetch Steam user information using the Steam Web API.
 	 *
 	 * This method retrieves user information from Steam using the user's Steam ID
 	 * and API key. The data is fetched via the Steam Web API and returned as an array.
 	 * If the request fails, an error is logged and the method returns null.
-	 * 
+	 *
 	 * @param string $steam_id The Steam ID of the user.
 	 * @return array|null The Steam user information if available, or null if the request fails.
 	 */
@@ -332,7 +387,7 @@ class Woo_Discord_Steam_Integration_Utils {
 		$response = wp_remote_get( $api_url );
 
 		if ( is_wp_error( $response ) ) {
-			//error_log( 'Error fetching Steam user info: ' . $response->get_error_message() );
+			// error_log( 'Error fetching Steam user info: ' . $response->get_error_message() );
 			return null;
 		}
 
@@ -375,6 +430,9 @@ class Woo_Discord_Steam_Integration_Utils {
 	/**
 	 * Retrieve the Discord role ID associated with a product.
 	 *
+	 * @deprecated This method is deprecated in favor of get_discord_rules_by_product()
+	 * which supports multiple rules. This method will be removed in a future release.
+	 *
 	 * This method fetches the Discord role ID stored in the post meta for a given product ID.
 	 *
 	 * @param int $product_id The ID of the product.
@@ -384,6 +442,25 @@ class Woo_Discord_Steam_Integration_Utils {
 		$discord_role_id = get_post_meta( $product_id, '_ets_discord_role_id', true );
 		return $discord_role_id ? $discord_role_id : null;
 	}
+
+	/**
+	 * Retrieve the Discord action rules associated with a product.
+	 *
+	 * This method fetches the stored rules, which may include triggers, actions,
+	 * servers, and roles associated with a given product ID. The rules provide
+	 * a flexible way to map different Discord actions to product events.
+	 *
+	 * @param int $product_id The ID of the product.
+	 * @return array The array of Discord rules, or an empty array if no rules are found.
+	 */
+	public static function get_discord_rules_by_product( $product_id ) {
+		$discord_action_rules = get_post_meta( $product_id, '_discord_action_rules', true );
+        $discord_action_rules = ! empty( $discord_action_rules ) ? unserialize( $discord_action_rules ) : [];
+
+		return $discord_action_rules;
+
+	}
+
 
 	/**
 	 * Get the URL for the top-level menu icon.
@@ -410,5 +487,16 @@ class Woo_Discord_Steam_Integration_Utils {
 		return Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/images/settings.png';
 	}
 
+	public static function get_saved_servers_menu() {
+		$discord_server_id   = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		$discord_server_id_2 = sanitize_text_field( trim( get_option( 'discord_server_id_2' ) ) );
 
+		$servers                       = array();
+		$servers[ $discord_server_id ] = 'Server 1';
+		if ( ! empty( $discord_server_id_2 ) ) {
+			$servers[ $discord_server_id_2 ] = 'Server 2';
+		}
+
+		return $servers;
+	}
 }
