@@ -54,3 +54,14 @@ display: flex;
     font-weight: 500;
     cursor: pointer;
 }
+div.then-section{
+    text-align: center;
+    display: flex;
+    align-items: center;
+    /* justify-content: center; */
+    /* width: 100%; */
+    /* font-weight: bold; */
+    /* margin: 0 10px; */
+    /* border: 1px solid; */
+    background-color: #efefef;
+}

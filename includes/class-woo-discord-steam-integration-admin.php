@@ -250,7 +250,10 @@ class Woo_Discord_Steam_Integration_Admin {
 	
 			$discord_rules = array();
 
+			error_log( print_r( $_POST['woo-discord-message'], true ) );
+
 			foreach ( $_POST['woo-discord-trigger'] as $index => $trigger ) {
+				
 				$action = isset( $_POST['woo-discord-action'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-action'][ $index ] ) : '';
 				$server = isset( $_POST['woo-discord-server'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-server'][ $index ] ) : '';
 				$role   = isset( $_POST['woo-discord-role'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-role'][ $index ] ) : '';

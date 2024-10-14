@@ -431,6 +431,80 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 		}
 	}
 
+	public function send_message_action( $user_id, $role_id, $server_id, $channel_id, $message, $order_id ) {
+		
+		$user_info = get_userdata( $user_id );
+		$steam_id = get_user_meta( $user_id, '_ets_steam_id', true );
+		$steam_name = get_user_meta( $user_id, '_ets_steam_personaname', true );
+		$discord_id = get_user_meta( $user_id, '_ets_discord_user_id', true );
+		$discord_name = get_user_meta( $user_id, '_ets_discord_username', true );
+		$ip_address = $_SERVER['REMOTE_ADDR']; 
+		$email = $user_info->user_email;
+	
+
+		$order = wc_get_order( $order_id );
+		$product_name = '';
+		$product_expiry = '';
+		$product_price = '';
+	
+		// if ( $order ) {
+		// 	foreach ( $order->get_items() as $item ) {
+		// 		$product_name = $item->get_name();
+		// 		$product_price = wc_price( $item->get_total() );
+		// 		$subscription = wcs_get_subscriptions_for_order( $order_id );
+		// 		if ( $subscription ) {
+		// 			$product_expiry = date_i18n( get_option( 'date_format' ), $subscription->get_date( 'end' ) );
+		// 		}
+		// 		break; 
+		// 	}
+		// }
+	
+		// Replace placeholders in the message body
+		$message = str_replace(
+			array(
+				'{SteamID}', 
+				'{Game-Server}', 
+				'{SteamName}', 
+				'{Product}', 
+				'{Product Expiry}', 
+				'{Product Price}', 
+				'{IP}', 
+				'{email}', 
+				'{date}', 
+				'{DiscordID}', 
+				'{DiscordName}'
+			),
+			array(
+				$steam_id, 
+				$this->get_selected_game_server(),
+				$steam_name, 
+				$product_name, 
+				$product_expiry, 
+				$product_price, 
+				$ip_address, 
+				$email, 
+				date_i18n( get_option( 'date_format' ) ), 
+				$discord_id, 
+				$discord_name
+			),
+			$message
+		);
+	
+		
+		if ( $channel_id ) {
+			$this->send_message_to_channel( $channel_id, $message );
+		}
+	}
+	
+	/**
+	 * Helper function to fetch the selected game server.
+	 * stored in checkout data.
+	 */
+	private function get_selected_game_server() {
+		// return WC()->session->get('wcsr_game_server_details') ? WC()->session->get('wcsr_game_server_details') : 'Unknown Server';
+	}
+		
+
 	/**
 	 * Send a message to a Discord channel.
 	 *
@@ -439,7 +513,7 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	 * @return bool True if successful, false otherwise.
 	 */
 	public function send_message_to_channel( $channel_id, $message ) {
-		// //error_log( "Trying ... Send mesage to channel ID : $channel_id " );
+		error_log( "Trying ... Send mesage to channel ID : $channel_id " );
 		$discord_bot_token = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
 
 		$discord_send_message_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'channels/' . $channel_id . '/messages';

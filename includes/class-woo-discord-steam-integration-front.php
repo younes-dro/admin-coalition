@@ -44,6 +44,10 @@ class Woo_Discord_Steam_Integration_Front {
 		add_action( 'woocommerce_checkout_process', array( $this, 'validate_connect_buttons' ), 99 );
 		add_action( 'woocommerce_before_checkout_process', array( $this, 'validate_connect_buttons' ), 20 );
 		add_action( 'woocommerce_after_checkout_validation', array( $this, 'custom_validate_connect_buttons' ), 10, 99 );
+
+		// wcsr 
+		// wcsr_subscription_process_checkout
+		// wcsr_subscription_process_checkout_payment_method
 	}
 
 	public function register_public_assets() {
@@ -464,20 +468,25 @@ class Woo_Discord_Steam_Integration_Front {
 				continue;
 			}
 			
-			error_log('Rules for product id : ' . $product_id . ' : ' .pirnt_r( $discord_rules, true) );
+			error_log('Rules for product id : ' . $product_id . ' : ' .print_r( $discord_rules, true) );
 
 			foreach ( $discord_rules as $rule ) {
 				$trigger = $rule['trigger'];
 				$action = $rule['action'];
 				$server_id = $rule['server'];
 				$role_id = $rule['role'];
+				$channel_id = $rule['channel'];
+				$message = $rule['message'];
 
 				if( ! empty( $role_id ) ){
 					if ( 'purchased' === $trigger && 'assign_role' === $action ) {
 						$this->discord_handler->add_role_to_user( $user_id, $role_id, $server_id );
 					}
-					if( 'purchased' === $trigger && 'send_message' === $action ) {
-						// $this->discord_handler->send_message( $user_id, $role_id, $server_id, $channel_id );
+				}
+				if( !empty($channel_id)){
+					if( 'subscription_purchased' === $trigger && 'send_message' === $action ) {
+						error_log(print_r( 'Call Send msg action', true ) );
+						$this->discord_handler->send_message_action( $user_id, $role_id, $server_id, $channel_id, $message, $order_id );
 					} 
 				}
 				

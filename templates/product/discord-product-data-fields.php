@@ -23,6 +23,8 @@ $server_2_roles = maybe_unserialize( get_option( 'discord_all_roles_' . $server_
 $server_1_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels( $server_1 );
 $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels( $server_2 );
 
+error_log( print_r( $discord_action_rules, true ) );
+
 ?>
 <div id="discord_product_data" class="panel woocommerce_options_panel hidden">
 
@@ -49,7 +51,9 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
                                 <option value="renew" <?php selected( $rule['trigger'], 'renew' ); ?>>When the subscription is renewed</option>
                             </select>
                         </div>
-
+                        <div class="then-section">
+                        <span>Then</span>
+                        </div>
                         <div class="dropdown-section">
                             <select class="action-dropdown" name="woo-discord-action[]">
                                 <option value="assign_role" <?php selected( $rule['action'], 'assign_role' ); ?>>Assign role to customer on server</option>
@@ -57,7 +61,9 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
                                 <option value="send_message" <?php selected( $rule['action'], 'send_message' ); ?>>Send message on server</option>
                             </select>
                         </div>
-
+                        <div class="then-section">
+                        <span>On</span>
+                    </div>
                         <div class="dropdown-section">
                             <select class="server-dropdown" name="woo-discord-server[]">
                                 <option value="<?php echo esc_attr( $server_1 ); ?>" <?php selected( $rule['server'], $server_1 ); ?>>Server 1</option>
@@ -84,14 +90,14 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
                     </div>
 
                     <div class="channel-section">
-                        <select class="channel-dropdown server-1-channels" name="woo-discord-channel[]" <?php echo ( $rule['server'] == $server_1 && $rule['action'] == 'send_message') ? '' : 'disabled style="display:none;"'; ?> >
+                        <select class="channel-dropdown server-1-channels" name="woo-discord-channel[]" <?php echo ( $rule['server'] == $server_1 && $rule['action'] == 'send_message') ? '' : ' style="display:none;"'; ?> >
                             <?php foreach( $server_1_channels as $channel_id => $channel_name) :?>
                                 <option value="<?php echo esc_attr( $channel_id);?>" <?php echo  isset ($rule['channel'])  ? selected( $rule['channel'], $channel_id, false) : '' ?> >
                                     <?php echo esc_html( $channel_name)?>
                                 </option>
                             <?php endforeach ?>
                         </select>  
-                        <select class="channel-dropdown server-2-channels" name="woo-discord-channel[]" <?php echo ( $rule['server'] == $server_2 && $rule['action'] == 'send_message') ? '' : 'disabled style="display:none;"'; ?> >
+                        <select class="channel-dropdown server-2-channels" name="woo-discord-channel[]" <?php echo ( $rule['server'] == $server_2 && $rule['action'] == 'send_message') ? '' : ' style="display:none;"'; ?> >
                             <?php foreach( $server_2_channels as $channel_id => $channel_name) :?>
                                 <option value="<?php echo esc_attr( $channel_id);?>" <?php echo  isset ($rule['channel'])  ? selected( $rule['channel'], $channel_id, false) : '' ?>>
                                     <?php echo esc_html( $channel_name)?>
@@ -130,7 +136,7 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
             
             roleSection.find('.role-dropdown').prop('disabled', true).hide();
             channelSection.find('.channel-dropdown').prop('disabled', true).hide();
-            messageSection.find('.message-textarea').prop('disabled', true).hide();
+            messageSection.find('.message-textarea').prop('disabled', false).hide();
 
             if (selectedAction === 'send_message') {
                 
