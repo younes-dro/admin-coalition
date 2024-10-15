@@ -474,9 +474,26 @@ class Woo_Discord_Steam_Integration_Front {
 				$trigger = $rule['trigger'];
 				$action = $rule['action'];
 				$server_id = $rule['server'];
-				$role_id = $rule['role'];
-				$channel_id = $rule['channel'];
+				// $role_id = $rule['role'];
+				// $channel_id = $rule['channel'];
 				$message = $rule['message'];
+
+				$discord_server_1 = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+				$discord_server_2 = sanitize_text_field( trim( get_option( 'discord_server_id_2' ) ) );
+				$role_id = '';
+				$channel_id = '';
+				if ( isset( $server_id ) && !empty( $server_id ) ) {
+				
+					if ( $discord_server_1 === $server_id ) {
+						$role_id = isset( $rule['role_1'] ) ? $rule['role_1'] : '';
+						$channel_id = isset( $rule['channel_1'] ) ? $rule['channel_1'] : '';
+				
+					} elseif ( !empty( $discord_server_2 ) && $discord_server_2 === $server_id ) {
+						$role_id = isset( $rule['role_2'] ) ? $rule['role_2'] : '';
+						$channel_id = isset( $rule['channel_2'] ) ? $rule['channel_2'] : '';
+					}
+				}
+				
 
 				if( ! empty( $role_id ) ){
 					if ( 'purchased' === $trigger && 'assign_role' === $action ) {
@@ -524,8 +541,12 @@ class Woo_Discord_Steam_Integration_Front {
 				$trigger = $rule['trigger'];
 				$action = $rule['action'];
 				$server_id = $rule['server'];
-				$role_id = $rule['role'];
+				// $role_id = $rule['role'];
+				
+				$discord_server_1 = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+				$discord_server_2 = sanitize_text_field( trim( get_option( 'discord_server_id_2' ) ) );
 
+				$role_id = ( $discord_server_1 === $server_id ) ? $rule['role_1'] : $rule['role_2'];
 				if( ! empty( $role_id ) ){
 					if ( 'refund' === $trigger && 'remove_role' === $action ) {
 						$this->discord_handler->remove_role_from_user( $user_id, $role_id, $server_id );

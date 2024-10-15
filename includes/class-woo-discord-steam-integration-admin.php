@@ -250,14 +250,16 @@ class Woo_Discord_Steam_Integration_Admin {
 	
 			$discord_rules = array();
 
-			error_log( print_r( $_POST['woo-discord-message'], true ) );
+			// error_log( print_r( $_POST['woo-discord-message'], true ) );
 
 			foreach ( $_POST['woo-discord-trigger'] as $index => $trigger ) {
 				
 				$action = isset( $_POST['woo-discord-action'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-action'][ $index ] ) : '';
 				$server = isset( $_POST['woo-discord-server'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-server'][ $index ] ) : '';
-				$role   = isset( $_POST['woo-discord-role'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-role'][ $index ] ) : '';
-				$channel   = isset( $_POST['woo-discord-channel'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-channel'][ $index ] ) : '';
+				$role_server_1   = isset( $_POST['woo-discord-server-1-role'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-server-1-role'][ $index ] ) : '';
+				$role_server_2   = isset( $_POST['woo-discord-server-2-role'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-server-2-role'][ $index ] ) : '';
+				$channel_server_1   = isset( $_POST['woo-discord-server-1-channel'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-server-1-channel'][ $index ] ) : '';
+				$channel_server_2   = isset( $_POST['woo-discord-server-2-channel'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-server-2-channel'][ $index ] ) : '';
 				$message   = isset( $_POST['woo-discord-message'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-message'][ $index ] ) : '';
 
 				
@@ -265,10 +267,14 @@ class Woo_Discord_Steam_Integration_Admin {
 					'trigger' => sanitize_text_field( $trigger ),
 					'action'  => $action,
 					'server'  => $server,
-					'role'    => $role,
-					'channel' => $channel,
+					'role_1'    => $role_server_1,
+					'role_2'    => $role_server_2,
+					'channel_1' => $channel_server_1,
+					'channel_2' => $channel_server_2,
 					'message' => $message,
 				);
+
+				error_log( print_r( $discord_rules, true));
 			}
 
 			update_post_meta( $post_id, '_discord_action_rules', serialize( $discord_rules ) );
