@@ -68,7 +68,7 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
 
                     <div class="role-section">
                         <select class="role-dropdown server-1-roles" name="woo-discord-server-1-role[]" >
-                            <option value="0">Server 1 roles</option>
+                            
                             <?php foreach ( $server_1_roles as $role_id => $role_name ) : ?>
                                 <option value="<?php echo esc_attr( $role_id ); ?>" <?php selected( $rule['role_1'], $role_id ); ?>>
                                     <?php echo esc_html( $role_name ); ?>
@@ -76,7 +76,7 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
                             <?php endforeach; ?>
                         </select>
                         <select class="role-dropdown server-2-roles" name="woo-discord-server-2-role[]" >
-                        <option value="0">Server 2 roles</option>
+                        
                             <?php foreach ( $server_2_roles as $role_id => $role_name ) : ?>
                                 <option value="<?php echo esc_attr( $role_id ); ?>" <?php selected( $rule['role_2'], $role_id ); ?>>
                                     <?php echo esc_html( $role_name ); ?>
