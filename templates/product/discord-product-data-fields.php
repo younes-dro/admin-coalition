@@ -70,7 +70,7 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
                         <select class="role-dropdown server-1-roles" name="woo-discord-server-1-role[]" >
                             
                             <?php foreach ( $server_1_roles as $role_id => $role_name ) : ?>
-                                <option value="<?php echo esc_attr( $role_id ); ?>" <?php selected( $rule['role_1'], $role_id ); ?>>
+                                <option value="<?php echo esc_attr( $role_id ); ?>" <?php echo isset( $rule['role_1']) ? selected( $rule['role_1'], $role_id, false ) : ''; ?>>
                                     <?php echo esc_html( $role_name ); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -78,7 +78,7 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
                         <select class="role-dropdown server-2-roles" name="woo-discord-server-2-role[]" >
                         
                             <?php foreach ( $server_2_roles as $role_id => $role_name ) : ?>
-                                <option value="<?php echo esc_attr( $role_id ); ?>" <?php selected( $rule['role_2'], $role_id ); ?>>
+                                <option value="<?php echo esc_attr( $role_id ); ?>" <?php echo isset( $rule['role_2']) ? selected( $rule['role_2'], $role_id, false ) : '' ; ?>>
                                     <?php echo esc_html( $role_name ); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -146,6 +146,8 @@ jQuery(document).ready(function($) {
 
         if (selectedAction === 'send_message') {
             messageSection.show();
+            roleSection.find('.server-1-roles').hide();
+            roleSection.find('.server-2-roles').hide();
 
             if (selectedServer === '<?php echo esc_js($server_1); ?>') {
                 channelSection.find('.server-1-channels').show();

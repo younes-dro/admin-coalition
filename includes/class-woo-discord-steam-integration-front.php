@@ -48,6 +48,9 @@ class Woo_Discord_Steam_Integration_Front {
 		// wcsr 
 		// wcsr_subscription_process_checkout
 		// wcsr_subscription_process_checkout_payment_method
+		add_action( 'wcsr_subscription_process_checkout', array( $this, 'handle_subscription_process_checkout' ), 10, 3 );
+		add_action( 'wcsr_subscription_process_checkout_payment_method', array( $this, 'handle_subscription_process_checkout_payment_method' ), 10, 2 );
+
 	}
 
 	public function register_public_assets() {
@@ -625,5 +628,29 @@ class Woo_Discord_Steam_Integration_Front {
 		if ( ! $steam_connected ) {
 			$errors->add( 'validation', '<strong>Connecting Steam</strong> is required.' );
 		}
+	}
+
+	public function handle_subscription_process_checkout( $order_id, $posted_data, $subscription){
+		$current_hook = current_action(  );
+		error_log( "Called Function: " . __FUNCTION__ );
+
+		error_log( print_r("Hook Called : " . $current_hook, true ) );
+
+		error_log( print_r("Order id : " . $order_id, true ) );
+
+		error_log( print_r("Subcription: " . $subscription, true ) );
+
+
+	}
+	
+	public function handle_subscription_process_checkout_payment_method( $order_id, $posted_data ){
+		$current_hook = current_action(  );
+		error_log( "Called Function: " . __FUNCTION__ );
+
+		error_log( print_r("Hook Called : " . $current_hook, true ) );
+
+		error_log( print_r("Order id : " . $order_id, true ) );
+
+		error_log( print_r("Posted Data: " . $posted_data, true ) );
 	}
 }
