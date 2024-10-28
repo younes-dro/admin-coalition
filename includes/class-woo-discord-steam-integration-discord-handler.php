@@ -344,6 +344,7 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 				}
 			}
 			update_user_meta( $user_id, '_ets_discord_user_id', $_ets_discord_user_id );
+			// Save the server 
 		}
 	}
 
@@ -362,7 +363,7 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	}
 
 	/**
-	 * Method to add new members to discord guild.
+	 * Method to add new members to Discord guild.
 	 *
 	 * @param INT    $_ets_discord_user_id
 	 * @param INT    $user_id
@@ -370,17 +371,17 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	 * @return NONE
 	 */
 	public function ets_discord_as_handler_add_member_to_guild( $_ets_discord_user_id, $user_id, $access_token ) {
-		// Since we using a queue to delay the API call, there may be a condition when a member is delete from DB. so put a check.
+		// Check to ensure the member still exists.
 		if ( get_userdata( $user_id ) === false ) {
 			return;
 		}
 
-		// $guild_id          = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
 		$guild_id          = sanitize_text_field( trim( get_option( 'discord_saved_server' ) ) );
 		$discord_bot_token = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
 
 		$guilds_memeber_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id;
-		$guild_args             = array(
+
+		$guild_args = array(
 			'method'  => 'PUT',
 			'headers' => array(
 				'Content-Type'  => 'application/json',
@@ -393,11 +394,21 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 				)
 			),
 		);
-		$guild_response         = wp_remote_post( $guilds_memeber_api_url, $guild_args );
+		$guild_response = wp_remote_post( $guilds_memeber_api_url, $guild_args );
 
-		/**
-		 * Error Logs
-		 */
+		if ( is_wp_error( $guild_response ) ) {
+			error_log( 'Error adding member to server. Error Code: ' . $guild_response->get_error_code() . '. Error Message: ' . $guild_response->get_error_message() );
+			return;
+		}
+
+		// Verify if the response is successful (2xx HTTP status)
+		$response_code = wp_remote_retrieve_response_code( $guild_response );
+		error_log( __FUNCTION__ . ' - HTTP response code: ' . $response_code );
+		if ( $response_code >= 200 && $response_code < 300 ) {
+			update_user_meta( $user_id, 'discord_server_id_added_' . $guild_id, $guild_id );
+		} else {
+			error_log( 'Failed to add user to server. HTTP Response Code: ' . $response_code );
+		}
 	}
 
 
@@ -554,11 +565,21 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 		} else{
 			$guild_id  = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
 		}
-		error_log( "Call add role for user id : $user_id - disord role :  $role_id " );
+
 		$access_token                = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_access_token', true ) ) );
 		$_ets_discord_user_id        = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_user_id', true ) ) );
 		$discord_bot_token           = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
 		$discord_change_role_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id . '/roles/' . $role_id;
+
+		error_log( "Call add role for user id : $user_id - disord role :  $role_id " );
+		
+		// check user if exist on server
+		$server_id_added = get_user_meta( $user_id,  'discord_server_id_added_' . $guild_id, true  );
+		error_log( 'Server_id_added value : ' . $server_id_added );
+		if( ! $server_id_added ){
+			error_log( 'User not exist in server. add him :' . $guild_id  );
+			$this->add_discord_member_in_guild($_ets_discord_user_id, $user_id, $access_token );
+		}
 
 		if ( $_ets_discord_user_id ) {
 			// error_log( "Execute add role for user id : $user_id - disord role :  $role_id " );
