@@ -499,7 +499,7 @@ class Woo_Discord_Steam_Integration_Front {
 				
 
 				if( ! empty( $role_id ) ){
-					if ( 'purchased' === $trigger && 'assign_role' === $action ) {
+					if ( ( 'purchased' === $trigger || 'subscription_purchased' === $trigger ) && 'assign_role' === $action ) {
 						$this->discord_handler->add_role_to_user( $user_id, $role_id, $server_id );
 					}
 				}
