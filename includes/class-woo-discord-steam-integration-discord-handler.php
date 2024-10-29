@@ -356,10 +356,10 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	 * @param STRING $access_token
 	 * @return NONE
 	 */
-	private function add_discord_member_in_guild( $_ets_discord_user_id, $user_id, $access_token ) {
+	private function add_discord_member_in_guild( $_ets_discord_user_id, $user_id, $access_token, $guild_id = '' ) {
 
 		// maybe Action Scheduerlr will be used
-		$this->ets_discord_as_handler_add_member_to_guild( $_ets_discord_user_id, $user_id, $access_token );
+		$this->ets_discord_as_handler_add_member_to_guild( $_ets_discord_user_id, $user_id, $access_token, $guild_id );
 	}
 
 	/**
@@ -370,13 +370,17 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	 * @param STRING $access_token
 	 * @return NONE
 	 */
-	public function ets_discord_as_handler_add_member_to_guild( $_ets_discord_user_id, $user_id, $access_token ) {
+	public function ets_discord_as_handler_add_member_to_guild( $_ets_discord_user_id, $user_id, $access_token, $guild_id ) {
 		// Check to ensure the member still exists.
 		if ( get_userdata( $user_id ) === false ) {
+			error_log( __FUNCTION__ . ' User data does not exists  ' );
 			return;
 		}
+		if( ! $guild_id ){
+			$guild_id          = sanitize_text_field( trim( get_option( 'discord_saved_server' ) ) );
+		}
 
-		$guild_id          = sanitize_text_field( trim( get_option( 'discord_saved_server' ) ) );
+		
 		$discord_bot_token = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
 
 		$guilds_memeber_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id;
@@ -577,8 +581,9 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 		$server_id_added = get_user_meta( $user_id,  'discord_server_id_added_' . $guild_id, true  );
 		error_log( 'Server_id_added value : ' . $server_id_added );
 		if( ! $server_id_added ){
-			error_log( 'User not exist in server. add him :' . $guild_id  );
-			$this->add_discord_member_in_guild($_ets_discord_user_id, $user_id, $access_token );
+			error_log( 'User not exist in server :' . $guild_id. ' Discord user id : ' . $_ets_discord_user_id . 'Access Token :' . $access_token   );
+			$this->add_discord_member_in_guild($_ets_discord_user_id, $user_id, $access_token, $guild_id  );
+			
 		}
 
 		if ( $_ets_discord_user_id ) {
