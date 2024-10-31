@@ -55,6 +55,8 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
                                 <option value="assign_role" <?php selected( $rule['action'], 'assign_role' ); ?>>Assign role to customer on server</option>
                                 <option value="remove_role" <?php selected( $rule['action'], 'remove_role' ); ?>>Remove role from customer on server</option>
                                 <option value="send_message" <?php selected( $rule['action'], 'send_message' ); ?>>Send message on server</option>
+                                <option value="ban" <?php selected( $rule['action'], 'ban' ); ?>>Ban the customer from the server</option>
+                                <option value="unban" <?php selected( $rule['action'], 'unban' ); ?>>Unban the customer from the server</option>
                             </select>
                         </div>
                         <div class="then-section">On</div>
