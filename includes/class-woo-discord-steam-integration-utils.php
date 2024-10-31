@@ -455,10 +455,9 @@ class Woo_Discord_Steam_Integration_Utils {
 	 */
 	public static function get_discord_rules_by_product( $product_id ) {
 		$discord_action_rules = get_post_meta( $product_id, '_discord_action_rules', true );
-        $discord_action_rules = ! empty( $discord_action_rules ) ? unserialize( $discord_action_rules ) : [];
+		$discord_action_rules = ! empty( $discord_action_rules ) ? unserialize( $discord_action_rules ) : array();
 
 		return $discord_action_rules;
-
 	}
 
 

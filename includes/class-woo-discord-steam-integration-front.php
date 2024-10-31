@@ -554,6 +554,9 @@ class Woo_Discord_Steam_Integration_Front {
 					if ( 'refund' === $trigger && 'remove_role' === $action ) {
 						$this->discord_handler->remove_role_from_user( $user_id, $role_id, $server_id );
 					}
+					if( 'refund' === $trigger && 'ban' === $action  ) {
+
+					}
 				}
 				
 			}
