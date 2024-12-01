@@ -337,13 +337,14 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 			$_ets_discord_user_id = sanitize_text_field( trim( $user_body['id'] ) );
 			if ( $discord_exist_user_id == $_ets_discord_user_id ) {
 				$_ets_discord_role_id = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_role_id', true ) ) );
-				if ( ! empty( $_ets__discord_role_id ) && $_ets_discord_role_id != 'none' ) {
+				if ( ! empty( $_ets_discord_role_id ) && $_ets_discord_role_id != 'none' ) {
 					/**
 					 * Maybe Remove user role
 					 */
 				}
 			}
 			update_user_meta( $user_id, '_ets_discord_user_id', $_ets_discord_user_id );
+			// Save the server
 		}
 	}
 
@@ -355,32 +356,35 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	 * @param STRING $access_token
 	 * @return NONE
 	 */
-	private function add_discord_member_in_guild( $_ets_discord_user_id, $user_id, $access_token ) {
+	private function add_discord_member_in_guild( $_ets_discord_user_id, $user_id, $access_token, $guild_id = '' ) {
 
 		// maybe Action Scheduerlr will be used
-		$this->ets_discord_as_handler_add_member_to_guild( $_ets_discord_user_id, $user_id, $access_token );
+		$this->ets_discord_as_handler_add_member_to_guild( $_ets_discord_user_id, $user_id, $access_token, $guild_id );
 	}
 
 	/**
-	 * Method to add new members to discord guild.
+	 * Method to add new members to Discord guild.
 	 *
 	 * @param INT    $_ets_discord_user_id
 	 * @param INT    $user_id
 	 * @param STRING $access_token
 	 * @return NONE
 	 */
-	public function ets_discord_as_handler_add_member_to_guild( $_ets_discord_user_id, $user_id, $access_token ) {
-		// Since we using a queue to delay the API call, there may be a condition when a member is delete from DB. so put a check.
+	public function ets_discord_as_handler_add_member_to_guild( $_ets_discord_user_id, $user_id, $access_token, $guild_id ) {
+		// Check to ensure the member still exists.
 		if ( get_userdata( $user_id ) === false ) {
+			error_log( __FUNCTION__ . ' User data does not exists  ' );
 			return;
 		}
+		if ( ! $guild_id ) {
+			$guild_id = sanitize_text_field( trim( get_option( 'discord_saved_server' ) ) );
+		}
 
-		// $guild_id          = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
-		$guild_id          = sanitize_text_field( trim( get_option( 'discord_saved_server' ) ) );
 		$discord_bot_token = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
 
 		$guilds_memeber_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id;
-		$guild_args             = array(
+
+		$guild_args     = array(
 			'method'  => 'PUT',
 			'headers' => array(
 				'Content-Type'  => 'application/json',
@@ -393,11 +397,21 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 				)
 			),
 		);
-		$guild_response         = wp_remote_post( $guilds_memeber_api_url, $guild_args );
+		$guild_response = wp_remote_post( $guilds_memeber_api_url, $guild_args );
 
-		/**
-		 * Error Logs
-		 */
+		if ( is_wp_error( $guild_response ) ) {
+			error_log( 'Error adding member to server. Error Code: ' . $guild_response->get_error_code() . '. Error Message: ' . $guild_response->get_error_message() );
+			return;
+		}
+
+		// Verify if the response is successful (2xx HTTP status)
+		$response_code = wp_remote_retrieve_response_code( $guild_response );
+		error_log( __FUNCTION__ . ' - HTTP response code: ' . $response_code );
+		if ( $response_code >= 200 && $response_code < 300 ) {
+			update_user_meta( $user_id, 'discord_server_id_added_' . $guild_id, $guild_id );
+		} else {
+			error_log( 'Failed to add user to server. HTTP Response Code: ' . $response_code );
+		}
 	}
 
 
@@ -405,10 +419,10 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	/**
 	 * Send a message to the Discord channel after payment is complete and role is assigned.
 	 *
-	* @deprecated since version 1.1.0, replaced by action rules.
-	* No longer needed as sending messages can now be handled through the new action rules,
-	* including the "send message" option. This eliminates the need to send messages via the 
-	* completed payment action hook.
+	 * @deprecated since version 1.1.0, replaced by action rules.
+	 * No longer needed as sending messages can now be handled through the new action rules,
+	 * including the "send message" option. This eliminates the need to send messages via the
+	 * completed payment action hook.
 	 * @param int $user_id The user ID.
 	 * @param int $product_id The product ID.
 	 */
@@ -431,6 +445,78 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 		}
 	}
 
+	public function send_message_action( $user_id, $role_id, $server_id, $channel_id, $message, $order_id ) {
+
+		$user_info    = get_userdata( $user_id );
+		$steam_id     = get_user_meta( $user_id, '_ets_steam_id', true );
+		$steam_name   = get_user_meta( $user_id, '_ets_steam_personaname', true );
+		$discord_id   = get_user_meta( $user_id, '_ets_discord_user_id', true );
+		$discord_name = get_user_meta( $user_id, '_ets_discord_username', true );
+		$ip_address   = $_SERVER['REMOTE_ADDR'];
+		$email        = $user_info->user_email;
+
+		$order          = wc_get_order( $order_id );
+		$product_name   = '';
+		$product_expiry = '';
+		$product_price  = '';
+
+		// if ( $order ) {
+		// foreach ( $order->get_items() as $item ) {
+		// $product_name = $item->get_name();
+		// $product_price = wc_price( $item->get_total() );
+		// $subscription = wcs_get_subscriptions_for_order( $order_id );
+		// if ( $subscription ) {
+		// $product_expiry = date_i18n( get_option( 'date_format' ), $subscription->get_date( 'end' ) );
+		// }
+		// break;
+		// }
+		// }
+
+		// Replace placeholders in the message body
+		$message = str_replace(
+			array(
+				'{SteamID}',
+				'{Game-Server}',
+				'{SteamName}',
+				'{Product}',
+				'{Product Expiry}',
+				'{Product Price}',
+				'{IP}',
+				'{email}',
+				'{date}',
+				'{DiscordID}',
+				'{DiscordName}',
+			),
+			array(
+				$steam_id,
+				$this->get_selected_game_server(),
+				$steam_name,
+				$product_name,
+				$product_expiry,
+				$product_price,
+				$ip_address,
+				$email,
+				date_i18n( get_option( 'date_format' ) ),
+				$discord_id,
+				$discord_name,
+			),
+			$message
+		);
+
+		if ( $channel_id ) {
+			$this->send_message_to_channel( $channel_id, $message );
+		}
+	}
+
+	/**
+	 * Helper function to fetch the selected game server.
+	 * stored in checkout data.
+	 */
+	private function get_selected_game_server() {
+		// return WC()->session->get('wcsr_game_server_details') ? WC()->session->get('wcsr_game_server_details') : 'Unknown Server';
+	}
+
+
 	/**
 	 * Send a message to a Discord channel.
 	 *
@@ -439,7 +525,7 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	 * @return bool True if successful, false otherwise.
 	 */
 	public function send_message_to_channel( $channel_id, $message ) {
-		// //error_log( "Trying ... Send mesage to channel ID : $channel_id " );
+		error_log( "Trying ... Send mesage to channel ID : $channel_id " );
 		$discord_bot_token = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
 
 		$discord_send_message_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'channels/' . $channel_id . '/messages';
@@ -471,20 +557,31 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	 * @param string $user_id The user ID.
 	 * @param string $role_id The role ID to be added.
 	 * @param int    $server_id The guild ID.
-	 * 
+	 *
 	 * @return bool True if successful, false otherwise.
 	 */
 	public function add_role_to_user( $user_id, $role_id, $server_id ) {
 		if ( $server_id ) {
 			$guild_id = $server_id;
-		} else{
-			$guild_id  = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		} else {
+			$guild_id = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
 		}
-		error_log( "Call add role for user id : $user_id - disord role :  $role_id " );
+
 		$access_token                = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_access_token', true ) ) );
 		$_ets_discord_user_id        = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_user_id', true ) ) );
 		$discord_bot_token           = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
 		$discord_change_role_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id . '/roles/' . $role_id;
+
+		error_log( "Call add role for user id : $user_id - disord role :  $role_id " );
+
+		// check user if exist on server
+		$server_id_added = get_user_meta( $user_id, 'discord_server_id_added_' . $guild_id, true );
+		error_log( 'Server_id_added value : ' . $server_id_added );
+		if ( ! $server_id_added ) {
+			error_log( 'User not exist in server :' . $guild_id . ' Discord user id : ' . $_ets_discord_user_id . 'Access Token :' . $access_token );
+			$this->add_discord_member_in_guild( $_ets_discord_user_id, $user_id, $access_token, $guild_id );
+
+		}
 
 		if ( $_ets_discord_user_id ) {
 			// error_log( "Execute add role for user id : $user_id - disord role :  $role_id " );
@@ -500,15 +597,15 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 			$response = wp_remote_get( $discord_change_role_api_url, $param );
 			error_log( print_r( $response, true ) );
 			if ( ! is_wp_error( $response ) ) {
-				error_log( print_r( 'Role Added ! '));
+				error_log( print_r( 'Role Added ! ' ) );
 			} else {
 				error_log( print_r( $response, true ) );
 			}
 
 			/**
 			 * Error logs */
-		} else{
-			error_log( print_r( 'Non discord id for adding role ', true));
+		} else {
+			error_log( print_r( 'Non discord id for adding role ', true ) );
 		}
 	}
 
@@ -517,24 +614,23 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 	 *
 	 * @param string $user_id The user ID.
 	 * @param string $role_id The role ID to be removed.
-	 * @param int $server_id The Server ID.
-	 * 
+	 * @param int    $server_id The Server ID.
+	 *
 	 * @return bool True if successful, false otherwise.
 	 */
 	public function remove_role_from_user( $user_id, $role_id, $server_id ) {
 		if ( $server_id ) {
 			$guild_id = $server_id;
-		} else{
-			$guild_id  = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+		} else {
+			$guild_id = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
 		}
-
 
 		error_log( "Call remove role for user id : $user_id - disord role :  $role_id " );
 
 		$access_token                = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_access_token', true ) ) );
 		$_ets_discord_user_id        = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_user_id', true ) ) );
 		$discord_bot_token           = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
-		$discord_delete_role_api_url            = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id . '/roles/' . $role_id;
+		$discord_delete_role_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/members/' . $_ets_discord_user_id . '/roles/' . $role_id;
 		error_log( print_r( 'discord_delete_role_api_url : ' . $discord_delete_role_api_url, true ) );
 		if ( $_ets_discord_user_id ) {
 			$param = array(
@@ -549,15 +645,99 @@ class Woo_Discord_Steam_Integration_Discord_Handler {
 			$response = wp_remote_request( $discord_delete_role_api_url, $param );
 			error_log( print_r( $response, true ) );
 			if ( ! is_wp_error( $response ) ) {
-				error_log( print_r( 'Role Removed ! ', true));
+				error_log( print_r( 'Role Removed ! ', true ) );
 			} else {
 				error_log( print_r( $response, true ) );
 			}
-			
-		} else{
-			error_log( print_r( 'Non discord id for removing role ', true));
+		} else {
+			error_log( print_r( 'Missing discord_user_id Non discord id for removing role ', true ) );
 		}
 	}
+
+	/**
+	 * Bans a user from the specified Discord server (guild).
+	 *
+	 * @param int $user_id   The ID of the user in WordPress.
+	 * @param int $server_id The Discord server (guild) ID to ban the user from.
+	 * @return void
+	 */
+	public function ban_user_from_server( $user_id, $server_id ) {
+		if ( ! $server_id ) {
+			error_log( 'Missing server ID!' );
+			return;
+		}
+
+		$guild_id                 = $server_id;
+		$_ets_discord_user_id     = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_user_id', true ) ) );
+		$discord_bot_token        = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
+		$discord_ban_user_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/bans/' . $_ets_discord_user_id;
+
+		if ( $_ets_discord_user_id ) {
+			$param = array(
+				'method'  => 'PUT',
+				'headers' => array(
+					'Authorization' => 'Bearer ' . $discord_bot_token,
+					'Content-Type'  => 'application/json',
+				),
+				'body'    => json_encode(
+					array(
+						'delete_message_days' => 7, // Deletes last 7 days of messages (optional)
+					)
+				),
+			);
+
+			$response = wp_remote_request( $discord_ban_user_api_url, $param );
+
+			if ( ! is_wp_error( $response ) ) {
+				error_log( 'User banned successfully!' );
+			} else {
+				error_log( 'Error banning user: ' . $response->get_error_message() );
+			}
+		} else {
+			error_log( 'Cannot ban the user: Missing Discord user ID' );
+		}
+	}
+
+	/**
+	 * Unbans a user from the specified Discord server (guild).
+	 *
+	 * @param int $user_id   The ID of the user in WordPress.
+	 * @param int $server_id The Discord server (guild) ID to unban the user from.
+	 * @return void
+	 */
+	public function unban_user_from_server( $user_id, $server_id ) {
+		if ( ! $server_id ) {
+			error_log( 'Missing server ID!' );
+			return;
+		}
+
+		$guild_id                   = $server_id;
+		$_ets_discord_user_id       = sanitize_text_field( trim( get_user_meta( $user_id, '_ets_discord_user_id', true ) ) );
+		$discord_bot_token          = sanitize_text_field( trim( get_option( 'discord_bot_token' ) ) );
+		$discord_unban_user_api_url = Woo_Discord_Steam_Integration_Constants::DISCORD_API_URL . 'guilds/' . $guild_id . '/bans/' . $_ets_discord_user_id;
+
+		// Check if the user has a Discord user ID
+		if ( $_ets_discord_user_id ) {
+			$param = array(
+				'method'  => 'DELETE',
+				'headers' => array(
+					'Authorization' => 'Bearer ' . $discord_bot_token,
+					'Content-Type'  => 'application/json',
+				),
+			);
+
+			$response = wp_remote_request( $discord_unban_user_api_url, $param );
+
+			if ( ! is_wp_error( $response ) ) {
+				error_log( 'User unbanned successfully!' );
+			} else {
+				error_log( 'Error unbanning user: ' . $response->get_error_message() );
+			}
+		} else {
+			error_log( 'Cannot unban the user: Missing Discord user ID' );
+		}
+	}
+
 
 	/**
 	 * Send a direct message to a Discord user.

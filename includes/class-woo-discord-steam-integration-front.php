@@ -44,6 +44,13 @@ class Woo_Discord_Steam_Integration_Front {
 		add_action( 'woocommerce_checkout_process', array( $this, 'validate_connect_buttons' ), 99 );
 		add_action( 'woocommerce_before_checkout_process', array( $this, 'validate_connect_buttons' ), 20 );
 		add_action( 'woocommerce_after_checkout_validation', array( $this, 'custom_validate_connect_buttons' ), 10, 99 );
+
+		// wcsr 
+		// wcsr_subscription_process_checkout
+		// wcsr_subscription_process_checkout_payment_method
+		add_action( 'wcsr_subscription_process_checkout', array( $this, 'handle_subscription_process_checkout' ), 10, 3 );
+		add_action( 'wcsr_subscription_process_checkout_payment_method', array( $this, 'handle_subscription_process_checkout_payment_method' ), 10, 2 );
+
 	}
 
 	public function register_public_assets() {
@@ -464,20 +471,42 @@ class Woo_Discord_Steam_Integration_Front {
 				continue;
 			}
 			
-			error_log('Rules for product id : ' . $product_id . ' : ' .pirnt_r( $discord_rules, true) );
+			error_log('Rules for product id : ' . $product_id . ' : ' .print_r( $discord_rules, true) );
 
 			foreach ( $discord_rules as $rule ) {
 				$trigger = $rule['trigger'];
 				$action = $rule['action'];
 				$server_id = $rule['server'];
-				$role_id = $rule['role'];
+				// $role_id = $rule['role'];
+				// $channel_id = $rule['channel'];
+				$message = $rule['message'];
+
+				$discord_server_1 = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+				$discord_server_2 = sanitize_text_field( trim( get_option( 'discord_server_id_2' ) ) );
+				$role_id = '';
+				$channel_id = '';
+				if ( isset( $server_id ) && !empty( $server_id ) ) {
+				
+					if ( $discord_server_1 === $server_id ) {
+						$role_id = isset( $rule['role_1'] ) ? $rule['role_1'] : '';
+						$channel_id = isset( $rule['channel_1'] ) ? $rule['channel_1'] : '';
+				
+					} elseif ( !empty( $discord_server_2 ) && $discord_server_2 === $server_id ) {
+						$role_id = isset( $rule['role_2'] ) ? $rule['role_2'] : '';
+						$channel_id = isset( $rule['channel_2'] ) ? $rule['channel_2'] : '';
+					}
+				}
+				
 
 				if( ! empty( $role_id ) ){
-					if ( 'purchased' === $trigger && 'assign_role' === $action ) {
+					if ( ( 'purchased' === $trigger || 'subscription_purchased' === $trigger ) && 'assign_role' === $action ) {
 						$this->discord_handler->add_role_to_user( $user_id, $role_id, $server_id );
 					}
-					if( 'purchased' === $trigger && 'send_message' === $action ) {
-						// $this->discord_handler->send_message( $user_id, $role_id, $server_id, $channel_id );
+				}
+				if( !empty($channel_id)){
+					if( 'subscription_purchased' === $trigger && 'send_message' === $action ) {
+						error_log(print_r( 'Call Send msg action', true ) );
+						$this->discord_handler->send_message_action( $user_id, $role_id, $server_id, $channel_id, $message, $order_id );
 					} 
 				}
 				
@@ -515,11 +544,18 @@ class Woo_Discord_Steam_Integration_Front {
 				$trigger = $rule['trigger'];
 				$action = $rule['action'];
 				$server_id = $rule['server'];
-				$role_id = $rule['role'];
+				// $role_id = $rule['role'];
+				
+				$discord_server_1 = sanitize_text_field( trim( get_option( 'discord_server_id' ) ) );
+				$discord_server_2 = sanitize_text_field( trim( get_option( 'discord_server_id_2' ) ) );
 
+				$role_id = ( $discord_server_1 === $server_id ) ? $rule['role_1'] : $rule['role_2'];
 				if( ! empty( $role_id ) ){
 					if ( 'refund' === $trigger && 'remove_role' === $action ) {
 						$this->discord_handler->remove_role_from_user( $user_id, $role_id, $server_id );
+					}
+					if( 'refund' === $trigger && 'ban' === $action  ) {
+
 					}
 				}
 				
@@ -595,5 +631,29 @@ class Woo_Discord_Steam_Integration_Front {
 		if ( ! $steam_connected ) {
 			$errors->add( 'validation', '<strong>Connecting Steam</strong> is required.' );
 		}
+	}
+
+	public function handle_subscription_process_checkout( $order_id, $posted_data, $subscription){
+		$current_hook = current_action(  );
+		error_log( "Called Function: " . __FUNCTION__ );
+
+		error_log( print_r("Hook Called : " . $current_hook, true ) );
+
+		error_log( print_r("Order id : " . $order_id, true ) );
+
+		error_log( print_r("Subcription: " . $subscription, true ) );
+
+
+	}
+	
+	public function handle_subscription_process_checkout_payment_method( $order_id, $posted_data ){
+		$current_hook = current_action(  );
+		error_log( "Called Function: " . __FUNCTION__ );
+
+		error_log( print_r("Hook Called : " . $current_hook, true ) );
+
+		error_log( print_r("Order id : " . $order_id, true ) );
+
+		error_log( print_r("Posted Data: " . $posted_data, true ) );
 	}
 }

@@ -92,6 +92,29 @@ $steam_web_api_key = sanitize_text_field( trim( get_option( 'steam_web_api_key' 
 			<th scope="row"><label for="discord_bot_token"><?php esc_html_e( 'Discord Bot Token', 'admin-coalition' ); ?></label></th>
 			<td><input type="password" id="discord_bot_token" name="discord_bot_token" value="<?php echo esc_attr( $discord_bot_token ); ?>" class="regular-text"></td>
 		</tr>
+		<tr>
+				<th scope="row">
+					<label for="discord_bot_redirect_url"><?php esc_html_e( 'Discord Bot URL', 'admin-coalition' ); ?></label>
+				</th>
+				<td>
+					<input type="text" id="discord_bot_redirect_url" name="discord_bot_redirect_url" value="<?php echo esc_attr( $discord_bot_redirect_url ); ?>" class="regular-text ets-disabled-input">
+					<button type="button" class="copy-btn" data-target="discord_bot_redirect_url" title="<?php esc_attr_e('Copy to clipboard', 'admin-coalition'); ?>">
+						📋
+					</button>
+				</td>
+		</tr>
+		<tr>
+			<th scope="row">
+				<label for="discord_auth_redirect_url"><?php esc_html_e( 'Discord Auth URL', 'admin-coalition' ); ?></label>
+			</th>
+			<td>
+				<input type="text" id="discord_auth_redirect_url" name="discord_auth_redirect_url" value="<?php echo esc_attr( $discord_auth_redirect_url ); ?>" class="regular-text ets-disabled-input">
+				<button type="button" class="copy-btn" data-target="discord_auth_redirect_url" title="<?php esc_attr_e('Copy to clipboard', 'admin-coalition'); ?>">
+					📋
+				</button>
+			</td>
+		</tr>
+
 
 	</table>
 

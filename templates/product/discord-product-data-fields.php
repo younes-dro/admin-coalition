@@ -49,15 +49,17 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
                                 <option value="renew" <?php selected( $rule['trigger'], 'renew' ); ?>>When the subscription is renewed</option>
                             </select>
                         </div>
-
+                        <div class="then-section">Then</div>
                         <div class="dropdown-section">
                             <select class="action-dropdown" name="woo-discord-action[]">
                                 <option value="assign_role" <?php selected( $rule['action'], 'assign_role' ); ?>>Assign role to customer on server</option>
                                 <option value="remove_role" <?php selected( $rule['action'], 'remove_role' ); ?>>Remove role from customer on server</option>
                                 <option value="send_message" <?php selected( $rule['action'], 'send_message' ); ?>>Send message on server</option>
+                                <option value="ban" <?php selected( $rule['action'], 'ban' ); ?>>Ban the customer from the server</option>
+                                <option value="unban" <?php selected( $rule['action'], 'unban' ); ?>>Unban the customer from the server</option>
                             </select>
                         </div>
-
+                        <div class="then-section">On</div>
                         <div class="dropdown-section">
                             <select class="server-dropdown" name="woo-discord-server[]">
                                 <option value="<?php echo esc_attr( $server_1 ); ?>" <?php selected( $rule['server'], $server_1 ); ?>>Server 1</option>
@@ -67,16 +69,18 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
                     </div>
 
                     <div class="role-section">
-                        <select class="role-dropdown server-1-roles" name="woo-discord-role[]" <?php echo $rule['server'] == $server_1 ? '' : 'disabled style="display:none;"'; ?>>
+                        <select class="role-dropdown server-1-roles" name="woo-discord-server-1-role[]" >
+                            
                             <?php foreach ( $server_1_roles as $role_id => $role_name ) : ?>
-                                <option value="<?php echo esc_attr( $role_id ); ?>" <?php selected( $rule['role'], $role_id ); ?>>
+                                <option value="<?php echo esc_attr( $role_id ); ?>" <?php echo isset( $rule['role_1']) ? selected( $rule['role_1'], $role_id, false ) : ''; ?>>
                                     <?php echo esc_html( $role_name ); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <select class="role-dropdown server-2-roles" name="woo-discord-role[]" <?php echo $rule['server'] == $server_2 ? '' : 'disabled style="display:none;"'; ?>>
+                        <select class="role-dropdown server-2-roles" name="woo-discord-server-2-role[]" >
+                        
                             <?php foreach ( $server_2_roles as $role_id => $role_name ) : ?>
-                                <option value="<?php echo esc_attr( $role_id ); ?>" <?php selected( $rule['role'], $role_id ); ?>>
+                                <option value="<?php echo esc_attr( $role_id ); ?>" <?php echo isset( $rule['role_2']) ? selected( $rule['role_2'], $role_id, false ) : '' ; ?>>
                                     <?php echo esc_html( $role_name ); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -84,16 +88,16 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
                     </div>
 
                     <div class="channel-section">
-                        <select class="channel-dropdown server-1-channels" name="woo-discord-channel[]" <?php echo ( $rule['server'] == $server_1 && $rule['action'] == 'send_message') ? '' : 'disabled style="display:none;"'; ?> >
+                        <select class="channel-dropdown server-1-channels" name="woo-discord-server-1-channel[]" >
                             <?php foreach( $server_1_channels as $channel_id => $channel_name) :?>
-                                <option value="<?php echo esc_attr( $channel_id);?>" <?php echo  isset ($rule['channel'])  ? selected( $rule['channel'], $channel_id, false) : '' ?> >
+                                <option value="<?php echo esc_attr( $channel_id);?>" <?php echo  isset ($rule['channel_1'])  ? selected( $rule['channel_1'], $channel_id, false) : '' ?> >
                                     <?php echo esc_html( $channel_name)?>
                                 </option>
                             <?php endforeach ?>
                         </select>  
-                        <select class="channel-dropdown server-2-channels" name="woo-discord-channel[]" <?php echo ( $rule['server'] == $server_2 && $rule['action'] == 'send_message') ? '' : 'disabled style="display:none;"'; ?> >
+                        <select class="channel-dropdown server-2-channels" name="woo-discord-server-2-channel[]"  >
                             <?php foreach( $server_2_channels as $channel_id => $channel_name) :?>
-                                <option value="<?php echo esc_attr( $channel_id);?>" <?php echo  isset ($rule['channel'])  ? selected( $rule['channel'], $channel_id, false) : '' ?>>
+                                <option value="<?php echo esc_attr( $channel_id);?>" <?php echo  isset ($rule['channel_2'])  ? selected( $rule['channel_2'], $channel_id, false) : '' ?>>
                                     <?php echo esc_html( $channel_name)?>
                                 </option>
                             <?php endforeach ?>
@@ -102,7 +106,7 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
 
                     <div class="message-section">
                       <?php $rule_message= trim( $rule['message']) ?>  
-                        <textarea class="message-textarea" name="woo-discord-message[]" <?php echo ($rule['action'] == 'send_message') ? '' : 'disabled style="display:none;"'; ?>><?php echo esc_textarea( $rule_message)?></textarea>
+                        <textarea class="message-textarea" name="woo-discord-message[]" ><?php echo esc_textarea( $rule_message)?></textarea>
                     </div>
 
                     <div class="woo-discord-steaam-remove-wrap">
@@ -117,51 +121,62 @@ $server_2_channels = Woo_Discord_Steam_Integration_Utils::fetch_discord_channels
 </div><!-- .woocommerce_options_panel -->
 
 <script>
-    jQuery(document).ready(function($) {
-        function toggleRoleAndChannelSections(actionDropdown, serverDropdown) {
-            var selectedAction = $(actionDropdown).val();
-            var selectedServer = $(serverDropdown).val();
-            var rowWrap = $(actionDropdown).closest('.woo-discord-steam-action-row-wrap');
 
-            var roleSection = rowWrap.find('.role-section');
-            var channelSection = rowWrap.find('.channel-section');
-            var messageSection = rowWrap.find('.message-section');
+jQuery(document).ready(function($) {
+    
+    function toggleFields(actionDropdown, serverDropdown) {
+        var selectedAction = $(actionDropdown).val();
+        var selectedServer = $(serverDropdown).val();
+        var rowWrap = $(actionDropdown).closest('.woo-discord-steam-action-row-wrap');
 
-            
-            roleSection.find('.role-dropdown').prop('disabled', true).hide();
-            channelSection.find('.channel-dropdown').prop('disabled', true).hide();
-            messageSection.find('.message-textarea').prop('disabled', true).hide();
+        var roleSection = rowWrap.find('.role-section');
+        var channelSection = rowWrap.find('.channel-section');
+        var messageSection = rowWrap.find('.message-section');
 
-            if (selectedAction === 'send_message') {
-                
-                if (selectedServer === '<?php echo esc_js($server_1); ?>') {
-                    channelSection.find('.server-1-channels').prop('disabled', false).show();
-                } else if (selectedServer === '<?php echo esc_js($server_2); ?>') {
-                    channelSection.find('.server-2-channels').prop('disabled', false).show();
-                }
-                messageSection.find('.message-textarea').prop('disabled', false).show();
-            } else {
-                
-                if (selectedServer === '<?php echo esc_js($server_1); ?>') {
-                    roleSection.find('.server-1-roles').prop('disabled', false).show();
-                } else if (selectedServer === '<?php echo esc_js($server_2); ?>') {
-                    roleSection.find('.server-2-roles').prop('disabled', false).show();
-                }
-            }
+        roleSection.find('.server-1-roles').hide();
+        roleSection.find('.server-2-roles').hide();
+
+        if (selectedServer === '<?php echo esc_js($server_1); ?>') {
+            roleSection.find('.server-1-roles').show();
+        } else if (selectedServer === '<?php echo esc_js($server_2); ?>') {
+            roleSection.find('.server-2-roles').show();
         }
 
         
-        $('.action-dropdown, .server-dropdown').each(function() {
-            toggleRoleAndChannelSections($(this).closest('.woo-discord-steam-action-row-wrap').find('.action-dropdown'), $(this).closest('.woo-discord-steam-action-row-wrap').find('.server-dropdown'));
-        });
+        channelSection.find('.server-1-channels').hide();
+        channelSection.find('.server-2-channels').hide();
 
-        
-        $(document).on('change', '.action-dropdown', function() {
-            toggleRoleAndChannelSections(this, $(this).closest('.woo-discord-steam-action-row-wrap').find('.server-dropdown'));
-        });
+        if (selectedAction === 'send_message') {
+            messageSection.show();
+            roleSection.find('.server-1-roles').hide();
+            roleSection.find('.server-2-roles').hide();
 
-        $(document).on('change', '.server-dropdown', function() {
-            toggleRoleAndChannelSections($(this).closest('.woo-discord-steam-action-row-wrap').find('.action-dropdown'), this);
-        });
+            if (selectedServer === '<?php echo esc_js($server_1); ?>') {
+                channelSection.find('.server-1-channels').show();
+            } else if (selectedServer === '<?php echo esc_js($server_2); ?>') {
+                channelSection.find('.server-2-channels').show();
+            }
+        } else {
+            messageSection.hide();  
+        }
+    }
+
+    $('.action-dropdown, .server-dropdown').each(function() {
+        var actionDropdown = $(this).closest('.woo-discord-steam-action-row-wrap').find('.action-dropdown');
+        var serverDropdown = $(this).closest('.woo-discord-steam-action-row-wrap').find('.server-dropdown');
+        toggleFields(actionDropdown, serverDropdown);
     });
+
+    $(document).on('change', '.action-dropdown', function() {
+        var serverDropdown = $(this).closest('.woo-discord-steam-action-row-wrap').find('.server-dropdown');
+        toggleFields(this, serverDropdown);
+    });
+
+    $(document).on('change', '.server-dropdown', function() {
+        var actionDropdown = $(this).closest('.woo-discord-steam-action-row-wrap').find('.action-dropdown');
+        toggleFields(actionDropdown, this);
+    });
+});
+
 </script>
+
