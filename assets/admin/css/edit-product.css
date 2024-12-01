@@ -1,0 +1,56 @@
+.woo-discord-steam-actions-container{
+    padding: 10px 20px 20px;
+    /* border: 1px solid #f00; */
+}
+
+.woo-discord-steam-header-container{
+    text-align: right;
+    border: 1px solid #c6c3c3;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    justify-content: space-between;
+    margin-inline: 0;
+    border-radius: 3px 3px 0 0;
+    background: #f6f6f6;
+    border-bottom: 0;
+}
+.woo-discord-steam-header-container label{
+width: auto;
+padding-left: 162px;
+font-weight: 600;
+font-size: 16px;
+}
+.woo-discord-steam-action{
+display: flex;
+flex-direction: column;
+gap: 15px;
+padding: 15px;
+border: 1px solid #c6c3c3;
+/* position: relative; */
+}
+.woo-discord-steam-action-row-wrap{
+    /* border: 1px solid #c6c3c3; */
+    position: relative;
+}
+.woo-discord-steam-action .woo-discord-steam-action-row{
+display: flex;
+/* position: relative; */
+}
+.woo-discord-steaam-remove-wrap{
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    min-width: 35px;
+    height: 94%;
+    background: #efefef;
+    border-radius: 0 3px 3px 0;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}

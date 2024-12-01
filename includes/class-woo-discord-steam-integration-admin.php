@@ -27,17 +27,10 @@ class Woo_Discord_Steam_Integration_Admin {
 		add_action( 'admin_init', array( $this, 'discord_connect_bot' ) );
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'add_discord_product_data_tab' ) );
 		add_action( 'woocommerce_product_data_panels', array( $this, 'add_discord_product_data_fields' ) );
-		add_action( 'woocommerce_process_product_meta', array( $this, 'save_discord_product_data' ) );
+		add_action( 'woocommerce_process_product_meta', array( $this, 'save_discord_product_data' ), 10, 2 );
 		add_filter( 'manage_users_columns', array( $this, 'add_custom_user_columns' ) );
 		add_action( 'manage_users_custom_column', array( $this, 'populate_custom_user_columns' ), 10, 3 );
 		add_action( 'pre_user_query', array( $this, 'sort_custom_columns' ) );
-
-		// Quick Edit
-		// add_filter( 'manage_edit-product_columns', array( $this, 'add_custom_product_columns' ) );
-		// add_action( 'manage_product_posts_custom_column', array( $this, 'populate_custom_product_columns' ), 10, 2 );
-		// add_action( 'quick_edit_custom_box', array( $this, 'quick_edit_discord_role_field' ), 10, 2 );
-		// add_action( 'save_post', array( $this, 'save_quick_edit_discord_role' ) );
-		// add_action( 'admin_footer', array( $this, 'enqueue_quick_edit_scripts' ) );
 	}
 
 	/**
@@ -51,7 +44,7 @@ class Woo_Discord_Steam_Integration_Admin {
 	public function enqueue_styles( $hook ) {
 
 		wp_register_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/css/admin.css', array(), time() );
-
+		wp_register_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-edit-product', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/css/edit-product.css', array(), time() );
 	}
 
 
@@ -64,16 +57,22 @@ class Woo_Discord_Steam_Integration_Admin {
 	 * @return void
 	 */
 	public function enqueue_scripts( $hook ) {
-
-		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/admin.js', array(), Woo_Discord_Steam_Integration()->get_plugin_version() );
+		$min     = '.min';
+		$version = Woo_Discord_Steam_Integration()->get_plugin_version();
+		if ( WP_DEBUG == true ) {
+			$version = time();
+			$min     = '';
+		}
+		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/admin.js', array( 'jquery' ), $version );
+		wp_register_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action', Woo_Discord_Steam_Integration()->plugin_url() . '/assets/admin/js/discord-action.js', array( 'jquery' ), $version );
 		$script_params = array(
 			'admin_ajax'                  => admin_url( 'admin-ajax.php' ),
 			'permissions_const'           => Woo_Discord_Steam_Integration_Constants::DISCORD_BOT_PERMISSIONS,
 			'is_admin'                    => is_admin(),
-			'ets-woo_discord_steam_nonce' => wp_create_nonce( 'ets-woo-discord--steam-ajax-nonce' ),
+			'ets_woo_discord_steam_nonce' => wp_create_nonce( 'ets-woo-discord--steam-ajax-nonce' ),
 		);
 		wp_localize_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-admin', 'etsWooDiscordSteamParams', $script_params );
-
+		wp_localize_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action', 'etsWooDiscordSteamParams', $script_params );
 	}
 
 
@@ -105,6 +104,8 @@ class Woo_Discord_Steam_Integration_Admin {
 	 */
 	public function save_settings() {
 
+		// error_log( print_r( $_POST, true ) );
+
 		if ( ! isset( $_POST['discord_steam_settings_nonce'] ) || ! wp_verify_nonce( $_POST['discord_steam_settings_nonce'], 'save_discord_steam_settings' ) ) {
 			wp_die( __( 'Nonce verification failed', 'admin-coalition' ) );
 		}
@@ -117,14 +118,17 @@ class Woo_Discord_Steam_Integration_Admin {
 			delete_option( 'discord_server_id' );
 			delete_option( 'discord_client_id' );
 			delete_option( 'discord_client_secret' );
+			// delete_option( 'discord_server_id_2' );
+			// delete_option( 'discord_client_id_2' );
+			// delete_option( 'discord_client_secret_2' );
 			delete_option( 'discord_bot_token' );
 			delete_option( 'discord_bot_redirect_url' );
 			delete_option( 'discord_auth_redirect_url' );
-			delete_option( 'discord_purchase_channel' );
+			// delete_option( 'discord_purchase_channel' );
 			delete_option( 'steam_web_api_key' );
 			delete_option( 'discord_all_roles' );
 			delete_option( 'discord_roles_color' );
-	
+
 			wp_redirect( admin_url( 'admin.php?page=admin-coalition&settings-reset=true' ) );
 			exit;
 		}
@@ -138,6 +142,15 @@ class Woo_Discord_Steam_Integration_Admin {
 		if ( isset( $_POST['discord_client_secret'] ) ) {
 			update_option( 'discord_client_secret', sanitize_text_field( $_POST['discord_client_secret'] ) );
 		}
+		if ( isset( $_POST['discord_server_id_2'] ) ) {
+			update_option( 'discord_server_id_2', sanitize_text_field( $_POST['discord_server_id_2'] ) );
+		}
+		// if ( isset( $_POST['discord_client_id_2'] ) ) {
+		// update_option( 'discord_client_id_2', sanitize_text_field( $_POST['discord_client_id_2'] ) );
+		// }
+		// if ( isset( $_POST['discord_client_secret_2'] ) ) {
+		// update_option( 'discord_client_secret_2', sanitize_text_field( $_POST['discord_client_secret_2'] ) );
+		// }
 		if ( isset( $_POST['discord_bot_token'] ) ) {
 			update_option( 'discord_bot_token', sanitize_text_field( $_POST['discord_bot_token'] ) );
 		}
@@ -147,13 +160,15 @@ class Woo_Discord_Steam_Integration_Admin {
 		if ( isset( $_POST['discord_auth_redirect_url'] ) ) {
 			update_option( 'discord_auth_redirect_url', sanitize_text_field( $_POST['discord_auth_redirect_url'] ) );
 		}
-		if ( isset( $_POST['discord_purchase_channel'] ) ) {
-			update_option( 'discord_purchase_channel', sanitize_text_field( $_POST['discord_purchase_channel'] ) );
+		// if ( isset( $_POST['discord_purchase_channel'] ) ) {
+		// 	update_option( 'discord_purchase_channel', sanitize_text_field( $_POST['discord_purchase_channel'] ) );
+		// }
+		if ( isset( $_POST['discord_saved_server'] ) ) {
+			update_option( 'discord_saved_server', sanitize_text_field( $_POST['discord_saved_server'] ) );
 		}
-		if ( isset( $_POST['steam_web_api_key'] ) ){
+		if ( isset( $_POST['steam_web_api_key'] ) ) {
 			update_option( 'steam_web_api_key', sanitize_text_field( $_POST['steam_web_api_key'] ) );
 		}
-
 
 		wp_redirect( admin_url( 'admin.php?page=admin-coalition&settings-updated=true' ) );
 		exit;
@@ -172,12 +187,16 @@ class Woo_Discord_Steam_Integration_Admin {
 				wp_send_json_error( 'You do not have sufficient rights', 403 );
 				exit();
 			}
+			$server_number     = intval( $_GET['server_number'] );
+			$server_suffix     = ( isset( $server_number ) && $server_number == 2 ) ? '_2' : '';
+			$discord_server_id = sanitize_text_field( trim( get_option( 'discord_server_id' . $server_suffix ) ) );
+
 			$params                    = array(
 				'client_id'            => sanitize_text_field( trim( get_option( 'discord_client_id' ) ) ),
 				'permissions'          => Woo_Discord_Steam_Integration_Constants::DISCORD_BOT_PERMISSIONS,
 				'response_type'        => 'code',
 				'scope'                => 'bot',
-				'guild_id'             => sanitize_text_field( trim( get_option( 'discord_server_id' ) ) ),
+				'guild_id'             => $discord_server_id,
 				'disable_guild_select' => 'true',
 				'redirect_uri'         => sanitize_text_field( trim( get_option( 'discord_bot_redirect_url' ) ) ),
 			);
@@ -208,39 +227,52 @@ class Woo_Discord_Steam_Integration_Admin {
 	 */
 	public function add_discord_product_data_fields() {
 		global $post;
-		?>
-		<div id="discord_product_data" class="panel woocommerce_options_panel">
-			<?php
-			$selected_role = get_post_meta( $post->ID, '_ets_discord_role_id', true );
-			$discord_roles = get_option( 'discord_all_roles', array() );
-			if ( ! is_array( $discord_roles ) ) {
-				$discord_roles = unserialize( $discord_roles );
-			}
-			asort( $discord_roles );
-			$discord_roles = array( '0' => __( 'Select a role', 'admin-coalition' ) ) + $discord_roles;
-
-			woocommerce_wp_select(
-				array(
-					'id'          => '_ets_discord_role_id',
-					'label'       => __( 'Discord Role', 'admin-coalition' ),
-					'options'     => $discord_roles,
-					'value'       => $selected_role,
-					'description' => __( 'Select a Discord role to assign when this product is purchased.', 'admin-coalition' ),
-				)
-			);
-			?>
-		</div>
-		<?php
+		wp_enqueue_style( Woo_Discord_Steam_Integration()->get_plugin_name() . '-edit-product' );
+		wp_enqueue_script( Woo_Discord_Steam_Integration()->get_plugin_name() . '-discord-action' );
+		wc_get_template( 'product/discord-product-data-fields.php', array( 'product_id' => $post->ID ), '', Woo_Discord_Steam_Integration()->plugin_path() . '/templates/' );
 	}
 
 	/**
 	 * Save the custom fields data when the product is saved.
 	 *
 	 * @param int $post_id The ID of the post (product) being saved.
+	 *
+	 * @since 1.0.0
 	 */
-	public function save_discord_product_data( $post_id ) {
-		$discord_role_id = isset( $_POST['_ets_discord_role_id'] ) ? sanitize_text_field( $_POST['_ets_discord_role_id'] ) : '';
-		update_post_meta( $post_id, '_ets_discord_role_id', $discord_role_id );
+	public function save_discord_product_data( $post_id, $post ) {
+
+		// error_log('Trigger data: ' . print_r($_POST['woo-discord-trigger'], true));
+		// error_log( 'Action data' . print_r( $_POST['woo-discord-action'], true ) );
+		// error_log( 'Server data' . print_r( $_POST['woo-discord-server'], true ) );
+		// error_log( 'Role data' . print_r( $_POST['woo-discord-role'], true ) );
+
+		if ( isset( $_POST['woo-discord-trigger'] ) && is_array( $_POST['woo-discord-trigger'] ) ) {
+	
+			$discord_rules = array();
+
+			foreach ( $_POST['woo-discord-trigger'] as $index => $trigger ) {
+				$action = isset( $_POST['woo-discord-action'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-action'][ $index ] ) : '';
+				$server = isset( $_POST['woo-discord-server'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-server'][ $index ] ) : '';
+				$role   = isset( $_POST['woo-discord-role'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-role'][ $index ] ) : '';
+				$channel   = isset( $_POST['woo-discord-channel'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-channel'][ $index ] ) : '';
+				$message   = isset( $_POST['woo-discord-message'][ $index ] ) ? sanitize_text_field( $_POST['woo-discord-message'][ $index ] ) : '';
+
+				
+				$discord_rules[] = array(
+					'trigger' => sanitize_text_field( $trigger ),
+					'action'  => $action,
+					'server'  => $server,
+					'role'    => $role,
+					'channel' => $channel,
+					'message' => $message,
+				);
+			}
+
+			update_post_meta( $post_id, '_discord_action_rules', serialize( $discord_rules ) );
+		} else {
+		
+			delete_post_meta( $post_id, '_discord_action_rules' );
+		}
 	}
 
 
@@ -280,7 +312,7 @@ class Woo_Discord_Steam_Integration_Admin {
 			$steam_avatar   = Woo_Discord_Steam_Integration_Utils::get_steam_avatar( $user_id );
 
 			if ( $steam_id ) {
-				$output = esc_html( $steam_id );
+				$output  = esc_html( $steam_id );
 				$output .= $steam_username ? '<br>' . esc_html( $steam_username ) : '';
 				if ( $steam_avatar ) {
 					$output .= '<br><img src="' . esc_url( $steam_avatar ) . '" alt="' . esc_attr( $steam_username ) . '" style="width:50px;height:50px;border-radius:50%;">';
@@ -315,5 +347,4 @@ class Woo_Discord_Steam_Integration_Admin {
 			$query->query_orderby = 'ORDER BY ' . $wpdb->prefix . 'usermeta.meta_value ' . ( $query->query_vars['order'] == 'ASC' ? 'asc' : 'desc' );
 		}
 	}
-
 }
